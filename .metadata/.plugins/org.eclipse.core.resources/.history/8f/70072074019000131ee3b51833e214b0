@@ -1,0 +1,48 @@
+package komp14.parser;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+
+public class ParseTree<T> {
+	private Node<T> root;
+	
+	public ParseTree(T root){
+		root = new Node<T>();
+		root.data = rootData;
+		root.
+	}
+	
+
+	public class Node<T>{
+		private T data;
+		private Node<T> parent;
+		private ArrayList<Node<T>> children;
+		
+		private Node(){
+			children = new ArrayList<Node<T>>();
+		}
+		
+		public T getData(){
+			return this.data;
+		}
+		public void setData(T data){
+			this.data = data;
+		}
+		
+		public Node<T> getParent(){
+			return this.parent;
+		}
+		
+		public void setParent(T parent){
+			this.parent = parent;
+		}
+		
+		public ArrayList<Node<T>> getChildren(){
+			return this.children;
+		}
+		
+		
+	}
+}

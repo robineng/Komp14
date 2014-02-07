@@ -1,0 +1,25 @@
+package komp14.parser;
+
+import komp14.lexer.*;
+
+public class Parser {
+	private Lexer lexer;
+
+	public static void main(String args[]) {
+		if (args.length != 1) {
+			System.err.println("Input valid filename");
+		}
+		new Parser(args[0]);
+
+	}
+
+	public Parser(String filename) {
+		lexer = new Lexer(filename);
+	}
+	
+	private void Start(){
+		
+	}
+	
+	
+}

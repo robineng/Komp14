@@ -1,0 +1,8 @@
+package komp14.parser;
+
+private Node<T> root;
+
+public class ParseTree<T> {
+	
+
+}
