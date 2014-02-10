@@ -9,7 +9,7 @@ public class Tester {
 	 */
 	public static void main(String[] args) {
 		try {
-			Lexer lexer = new Lexer("test.java");
+			Lexer lexer = new Lexer("Lexer.java");
 			System.out.println(lexer.getNextToken());
 			while(lexer.hasNext()) {
 				System.out.println(lexer.getNextToken());

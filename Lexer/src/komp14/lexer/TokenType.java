@@ -8,9 +8,15 @@ public enum TokenType {
 	STATIC("static"),
 	VOID("void"),
 	CLASS("class"),
-	STRING("String"),
-	PACKAGE("package"),
+	IF("if"),
 	NEW("new"),
+	RETURN("return"),
+	THIS("this"),
+	
+	//Types
+	BOOLEAN("boolean"),
+	INT("int"),
+	STRING("String"),
 
 	//Symbols
 	DOT("\\."),
@@ -21,10 +27,18 @@ public enum TokenType {
 	LEFTBRACE("\\{"),
 	RIGHTBRACE("\\}"),
 	PLUS("\\+"),
+	MINUS("\\-"),
 	RIGHTPAREN("\\)"),
 	ASSIGNMENT("="),
+	NOT("!"),
+	AND("&"),
+	OR("\\|"),
+	LESSTHAN("<"),
+	ASTERISK("\\*"),
 
-	//words that can have different length
+	//values
+	TRUE("true"),
+	FALSE("false"),
 	NUM("0|[1-9][0-9]*"),
 	ID("[a-zA-Z][a-zA-Z0-9]*");
 

@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 public class Lexer {
 
+	private boolean EOF;
 	private Pattern pattern;
 	private Scanner fileReader;
 	
@@ -28,8 +29,8 @@ public class Lexer {
 		pattern = Pattern.compile(patternBuilder.substring(1));
 		comingTokens = new LinkedList<Token>();
 		this.fileReader = new Scanner(new File(fileName));
+		EOF = false;
 		this.findNextLinesTokens();
-		System.err.println("Lexer created");
 	}
 
 	/**
@@ -38,7 +39,7 @@ public class Lexer {
 	 */
 	public Token getNextToken() {
 		Token t = comingTokens.pop();
-		if(comingTokens.isEmpty()) {
+		while(comingTokens.isEmpty() && !EOF) {
 			findNextLinesTokens();
 		}
 		return t;
@@ -49,7 +50,7 @@ public class Lexer {
 	 */
 	public void skipToken() {
 		comingTokens.pop();
-		if(comingTokens.isEmpty()) {
+		while(comingTokens.isEmpty() && !EOF) {
 			findNextLinesTokens();
 		}
 	}
@@ -73,6 +74,7 @@ public class Lexer {
 				}
 			}
 		}
+		else {EOF = true;}
 	}
 
 	/**
