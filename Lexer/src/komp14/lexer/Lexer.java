@@ -2,7 +2,7 @@ package komp14.lexer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,7 +11,8 @@ public class Lexer {
 
 	private Pattern pattern;
 	private Scanner fileReader;
-	private Token nextToken;
+	
+	private LinkedList<Token> comingTokens;
 
 	/**
 	 * Creates a lexer that reads from the file named 'fileName'
@@ -25,42 +26,9 @@ public class Lexer {
 			patternBuilder.append(String.format("|(?<%s>%s)", t.name(), t.getPattern()));
 		}
 		pattern = Pattern.compile(patternBuilder.substring(1));
+		comingTokens = new LinkedList<Token>();
 		this.fileReader = new Scanner(new File(fileName));
-		//Split on whitespace and all characters can can be close together in Java
-		fileReader.useDelimiter(
-				//whitespace
-				"\\s+|" +
-				//newlines
-				"\n|" +
-				//left parenthesis "("
-				"(?=\\()|" +
-				//right parenthesis ")"
-				"(?=\\))|" +
-				//left brace "{"
-				"(?=\\{)|" +
-				//right brace "}
-				"(?=\\})|" +
-				//left bracket "["
-				"(?=\\[)|" +
-				//right bracker "]"
-				"(?=\\])|" +
-				//semi colon ";"
-				"(?=;)");
-
-		//Find the first token to initialize it
-		if(fileReader.hasNextLine()) {
-			Matcher matcher = pattern.matcher(fileReader.next());
-			if(matcher.find()) {
-				for(TokenType t : TokenType.values()) {
-					if(matcher.group(t.name()) != null) {
-						nextToken = new Token(t, matcher.group(t.name()));
-						break;
-					}
-				}
-			}
-			else { nextToken = null; }
-		}
-		else { nextToken = null; }
+		this.findNextLinesTokens();
 		System.err.println("Lexer created");
 	}
 
@@ -69,37 +37,21 @@ public class Lexer {
 	 * Returns null if no token can be found.
 	 */
 	public Token getNextToken() {
-		Token currToken = nextToken;
-		if(fileReader.hasNext()) {
-			Matcher matcher = pattern.matcher(fileReader.next());
-			if(matcher.find()) {
-				for(TokenType t : TokenType.values()) {
-					if(matcher.group(t.name()) != null) {
-						nextToken = new Token(t, matcher.group(t.name()));
-						break;
-					}
-				}
-			}
-			else { nextToken = null; }
+		Token t = comingTokens.pop();
+		if(comingTokens.isEmpty()) {
+			findNextLinesTokens();
 		}
-		else { nextToken = null; }
-		return currToken;
+		return t;
 	}
 
 	/**
 	 * Skips the next Token in the file.
 	 */
 	public void skipToken() {
-		Matcher matcher = pattern.matcher(fileReader.next());
-		if(matcher.find()) {
-			for(TokenType t : TokenType.values()) {
-				if(matcher.group(t.name()) != null) {
-					nextToken = new Token(t, matcher.group(t.name()));
-					break;
-				}
-			}
+		comingTokens.pop();
+		if(comingTokens.isEmpty()) {
+			findNextLinesTokens();
 		}
-		else { nextToken = null; }
 	}
 
 	/**
@@ -107,7 +59,20 @@ public class Lexer {
 	 * Returns null if no token has been found.
 	 */
 	public Token peek() {
-		return nextToken;
+		return comingTokens.peek();
+	}
+	
+	private void findNextLinesTokens() {
+		if(fileReader.hasNextLine()) {
+			Matcher matcher = pattern.matcher(fileReader.nextLine());
+			while(matcher.find()) {
+				for(TokenType t : TokenType.values()) {
+					if(matcher.group(t.name()) != null) {
+						comingTokens.add(new Token(t, matcher.group(t.name())));
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -115,7 +80,7 @@ public class Lexer {
 	 * @return true if there are tokens left, otherwise false.
 	 */
 	public boolean hasNext() {
-		return (nextToken != null);
+		return !comingTokens.isEmpty();
 	}
 }
 /**
