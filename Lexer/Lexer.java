@@ -3,14 +3,12 @@ package komp14.lexer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Lexer {
 
-	private boolean EOF;
 	private Pattern pattern;
 	private Scanner fileReader;
 	
@@ -30,7 +28,6 @@ public class Lexer {
 		pattern = Pattern.compile(patternBuilder.substring(1));
 		comingTokens = new LinkedList<Token>();
 		this.fileReader = new Scanner(new File(fileName));
-		EOF = false;
 		this.findNextLinesTokens();
 	}
 
@@ -39,15 +36,11 @@ public class Lexer {
 	 * Returns null if no token can be found.
 	 */
 	public Token getNextToken() {
-		try {
-			Token t = comingTokens.pop();
-			while(comingTokens.isEmpty() && !EOF) {
-				findNextLinesTokens();
-			}
-			return t;
-		} catch (NoSuchElementException e) {
-			return null;
+		Token t = comingTokens.pop();
+		if(comingTokens.isEmpty()) {
+			findNextLinesTokens();
 		}
+		return t;
 	}
 
 	/**
@@ -55,7 +48,7 @@ public class Lexer {
 	 */
 	public void skipToken() {
 		comingTokens.pop();
-		while(comingTokens.isEmpty() && !EOF) {
+		if(comingTokens.isEmpty()) {
 			findNextLinesTokens();
 		}
 	}
@@ -79,7 +72,6 @@ public class Lexer {
 				}
 			}
 		}
-		else {EOF = true;}
 	}
 
 	/**
@@ -90,3 +82,29 @@ public class Lexer {
 		return !comingTokens.isEmpty();
 	}
 }
+/**
+ * A class to represent a Token created by the lexer on the pass through the document.
+ */
+class Token {
+	final private TokenType type;
+	final private String data;
+
+	public Token(TokenType type, String data) {
+		this.type = type;
+		this.data = data;
+	}
+
+	public TokenType getTokenType() {
+		return this.type;
+	}
+
+	public String getData() {
+		return this.data;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("(%s \"%s\")", type, data);
+	}
+}
+

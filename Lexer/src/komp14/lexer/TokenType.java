@@ -50,4 +50,9 @@ public enum TokenType {
 	public String getPattern() {
 		return lexerRegex;
 	}
+	
+	public boolean equals(TokenType t) {
+		if(t == null) { return false; }
+		return  t == this;
+	}
 }
