@@ -1,6 +1,11 @@
+.*
 *.class
 bin/
 dist/
 docs/
+<<<<<<< HEAD
 .idea
+=======
+.idea/
+>>>>>>> bc67fd400787015b3f044369686cb02d94ac4122
 .idea/workspace.xml
