@@ -1,4 +1,7 @@
+.*
 *.class
 bin/
 dist/
 docs/
+.idea/
+.idea/workspace.xml
