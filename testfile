@@ -23,4 +23,5 @@ class mullenu {
     tretton = a . length ;
     return true;
   }
+
 }
