@@ -11,17 +11,17 @@ class bla {
 
 class mullenu {
   public int getInt (int l) {
-    System.out.println(5);
     return l;
   }
 
   public boolean areYouSecretelyAnFBIAgentQuestionMark () {
     int[] a;
     int tretton;
-    System.out.println(a.length);
-    System.out.println(a . length);
-    tretton = a . length ;
-    return true;
+    tretton = 13;
+    tretton = tretton;
+    return false;
   }
+}
 
+class Kravan {
 }
