@@ -51,6 +51,7 @@ MORETHAN : '>';
 LEQ : '<=';
 MEQ : '>=';
 EQ : '==';
+NEQ :'!=';
 
 //Values
 TRUE : 'true';
@@ -89,7 +90,12 @@ stmt : LEFTBRACE (stmt)* RIGHTBRACE |
        ID ASSIGNMENT exp SEMICOLON|
        ID LEFTBRACKET exp RIGHTBRACKET ASSIGNMENT exp SEMICOLON;
 
-exp : exp op exp|
+exp : exp MULT exp|
+      exp (MINUS|PLUS) exp|
+      exp (MEQ|LEQ|MORETHAN|LESSTHAN) exp|
+      exp (EQ|NEQ) exp|
+      exp AND exp|
+      exp OR exp|
       exp LEFTBRACKET exp RIGHTBRACKET|
       exp DOT LENGTH|
       exp DOT ID LEFTPAREN explist RIGHTPAREN|
@@ -103,11 +109,17 @@ exp : exp op exp|
       NOT exp|
       LEFTPAREN exp RIGHTPAREN;
 
-op : AND|
-     LESSTHAN|
-     PLUS|
-     MINUS|
-     MULT;
+//op : MULT|
+//     MINUS|
+//     PLUS|
+//     MEQ|
+//     LEQ|
+//     MORETHAN|
+//     LESSTHAN|
+//     EQ|
+//     NEQ|
+//     AND|
+//     OR;
 
 explist : (exp (exprest)*)?;
 
