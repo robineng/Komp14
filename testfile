@@ -15,6 +15,7 @@ class mullenu {
   }
 
   public boolean areYouSecretelyAnFBIAgentQuestionMark () {
+    if(jaghatarmajs   . length ) {} else {}
     int[] a;
     int tretton;
     tretton = 13;

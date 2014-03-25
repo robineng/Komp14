@@ -13,6 +13,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
     private  HashMap<String, String> methodVariables;
     private javagrammarParser.MainclassContext mainclass;
     private final HashMap<String, javagrammarParser.ClassdeclContext> classes;
+    private javagrammarParser.ClassdeclContext currClass = null;
 
     public javagrammarSymbolListener(){
         super();
@@ -65,6 +66,9 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
 
     @Override public void enterStmt(@NotNull javagrammarParser.StmtContext ctx) {
         System.err.println("Entering stmt");
+        if(ctx.exp() != null) {
+            getTypeFromExp(ctx.exp(0));
+        }
         if(ctx.ID() != null) {
             String type = getTypeFromId(ctx.ID());
             System.out.println(type);
@@ -73,11 +77,13 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
 
     @Override public void enterClassdecl(@NotNull javagrammarParser.ClassdeclContext ctx) {
         System.err.println("Entering classdecl");
+        currClass = ctx;
         classVariables.clear();
     }
 
     @Override public void exitClassdecl(@NotNull javagrammarParser.ClassdeclContext ctx) {
         System.err.println("Exiting classdecl");
+        currClass = null;
         classVariables.clear();
     }
 
@@ -104,20 +110,76 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
      * Return the type.
      */
     private String getTypeFromExp(javagrammarParser.ExpContext exp) {
-        if(exp.exp() != null) {
-            return null;
-        }
-        if(exp.ID() != null && idAlreadyInCurrentContext(exp.ID())) {
-            if(exp.NEW() != null) {
-                return exp.ID().getText();
-            } else {
-                return getTypeFromId(exp.ID());
-            }
-        } else if(exp.INT_LIT() != null) {
+        System.err.println(exp.getText());
+        /*
+         * Every expression that makes it immediately obvious what type it is.
+         */
+        if(exp.INT_LIT() != null) {
             return "int";
         } else if(exp.TRUE() != null || exp.FALSE() != null) {
             return "boolean";
+        } else if(exp.THIS() != null) {
+            if(currClass == null) {
+                return mainclass.ID(0).getText();
+            } else {
+                return currClass.ID().getText();
+            }
+        } else if(exp.NEW() != null) {
+            if(exp.INT() != null && getTypeFromExp(exp.exp(0)).equals("int")) {
+                return "int[]";
+            } else if(classes.containsKey(exp.ID())) {
+                return exp.ID().getText();
+            } else {
+                System.err.println("Cannot create instance of " + exp.ID().getText());
+                System.exit(1);
+            }
+        } else if(exp.NOT() != null) {
+            if(getTypeFromId(exp.exp(0).ID()).equals("boolean")) {
+                return "boolean";
+            } else {
+                System.err.println("Cannot negate a non boolean value");
+                System.exit(1);
+            }
         }
+        //Just an ID, nothing else
+        else if(exp.ID().getText().equals(exp.getText())) {
+            return getTypeFromId(exp.ID());
+        }
+
+        /*
+         * Other expressions that aren't as obvious and might need some calculations
+         * to know which type to return.
+         */
+
+        if(exp.op() != null) {
+            if(getOpType(exp.op()).equals("arithmetic") && getTypeFromExp(exp.exp(0)).equals("int")
+                    && getTypeFromExp(exp.exp(1)).equals("int")) {
+                return "int";
+            } else if(getOpType(exp.op()).equals("boolean") && getTypeFromExp(exp.exp(0)).equals("boolean")
+                    && getTypeFromExp(exp.exp(1)).equals("boolean")) {
+               return "boolean";
+            }
+        }
+        
+
+        /*
+         * If we reach this point, we have made a mistake.
+         */
+        System.err.println("Something has gone terribly wrong in getTypeFromExp");
+        System.err.println("Check it out!");
+        System.exit(1);
+        return null;
+    }
+
+    private String getOpType(javagrammarParser.OpContext op) {
+        String optext = op.getText();
+        if(optext.matches("&&|<")) {
+            return "boolean";
+        } else optext.matches("+|-|*") {
+            return "arithmetic";
+        }
+        System.err.println("Something has gone really wrong with getOpType");
+        System.exit(1);
         return null;
     }
 
