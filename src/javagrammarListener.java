@@ -19,17 +19,6 @@ public interface javagrammarListener extends ParseTreeListener {
 	void exitExp(@NotNull javagrammarParser.ExpContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link javagrammarParser#op}.
-	 * @param ctx the parse tree
-	 */
-	void enterOp(@NotNull javagrammarParser.OpContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link javagrammarParser#op}.
-	 * @param ctx the parse tree
-	 */
-	void exitOp(@NotNull javagrammarParser.OpContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link javagrammarParser#methoddecl}.
 	 * @param ctx the parse tree
 	 */

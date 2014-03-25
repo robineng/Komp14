@@ -29,19 +29,6 @@ public class javagrammarBaseListener implements javagrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterOp(@NotNull javagrammarParser.OpContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitOp(@NotNull javagrammarParser.OpContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) { }
 	/**
 	 * {@inheritDoc}
