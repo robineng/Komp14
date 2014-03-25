@@ -25,4 +25,7 @@ class mullenu {
 }
 
 class Kravan {
+  public boolean opTest(){
+    return 1+2*3 < 3-2*1 || 10<9 && true;
+  }
 }
