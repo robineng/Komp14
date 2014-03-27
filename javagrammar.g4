@@ -100,6 +100,7 @@ exp : exp MULT exp|
       exp DOT LENGTH|
       exp DOT ID LEFTPAREN explist RIGHTPAREN|
       INT_LIT|
+      LONG_LIT|
       TRUE|
       FALSE|
       ID|

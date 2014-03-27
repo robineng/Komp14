@@ -116,6 +116,8 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
          */
         if(exp.INT_LIT() != null) {
             return "int";
+        } else if (exp.LONG_LIT() != null) {
+            return "long";
         } else if(exp.TRUE() != null || exp.FALSE() != null) {
             return "boolean";
         } else if(exp.THIS() != null) {
@@ -151,34 +153,55 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
          * to know which type to return.
          */
 
-        if(exp.op() != null) {
-            if(getOpType(exp.op()).equals("arithmetic") && getTypeFromExp(exp.exp(0)).equals("int")
-                    && getTypeFromExp(exp.exp(1)).equals("int")) {
-                return "int";
-            } else if(getOpType(exp.op()).equals("boolean") && getTypeFromExp(exp.exp(0)).equals("boolean")
-                    && getTypeFromExp(exp.exp(1)).equals("boolean")) {
+        else if((exp.MULT() != null) || (exp.MINUS() != null) || (exp.PLUS() != null)) {
+            //Could be either long or int
+            String numtype = getTypeFromExp(exp.exp(0));
+            if(numtype.matches("int|long") && numtype.equals(getTypeFromExp(exp.exp(1)))) {
+                return numtype;
+            } else {
+                System.err.println("Both expression must be either long or int.");
+                System.exit(1);
+            }
+        } else if((exp.MEQ() != null) || (exp.EQ() != null) || (exp.LEQ() != null)) {
+            String exptype = getTypeFromExp(exp.exp(0));
+            if(exptype.matches("int|long|boolean|int\\[\\]|long\\[\\]")) {
+                if(exptype.equals(getTypeFromExp(exp.exp(1)))) {
+                    return "boolean";
+                }
+            } else if (!getTypeFromExp(exp.exp(1)).matches("int|long|boolean|int\\[\\]|long\\[\\]")) {
                return "boolean";
             }
+            System.err.println("Cannot compare these types");
+            System.exit(1);
+        } else if(exp.LENGTH() != null) {
+            if(getTypeFromExp(exp.exp(0)).matches("int\\[\\]|long\\[\\]")) {
+                return "int";
+            }
+            System.err.println("Can not get the length of this object");
+            System.exit(1);
         }
-        
+        //There should now ONLY be exp.id left.
+        //Else something has gone wrong
+        else if(exp.ID() != null) {
+            //This will be a class name if the writer of the program did it right
+            String type = getTypeFromExp(exp.exp(0));
+            //Mainclass can't hold any methods so we'll just check other classes
+            javagrammarParser.ClassdeclContext expclass = classes.get(type);
+            for(javagrammarParser.MethoddeclContext method : expclass.methoddecl()) {
+                //Found the method
+                if(method.ID().getText().equals(exp.ID().getText())) {
+                    return method.type().getText();
+                }
+            }
+            System.err.println("Can't find the method");
+            System.exit(1);
+        }
 
         /*
          * If we reach this point, we have made a mistake.
          */
         System.err.println("Something has gone terribly wrong in getTypeFromExp");
         System.err.println("Check it out!");
-        System.exit(1);
-        return null;
-    }
-
-    private String getOpType(javagrammarParser.OpContext op) {
-        String optext = op.getText();
-        if(optext.matches("&&|<")) {
-            return "boolean";
-        } else optext.matches("+|-|*") {
-            return "arithmetic";
-        }
-        System.err.println("Something has gone really wrong with getOpType");
         System.exit(1);
         return null;
     }
