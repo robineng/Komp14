@@ -66,14 +66,26 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
 
     @Override public void enterStmt(@NotNull javagrammarParser.StmtContext ctx) {
         System.err.println("Entering stmt");
-        if(ctx.exp() != null) {
-            getTypeFromExp(ctx.exp(0));
+        if(ctx.IF() != null || ctx.WHILE() != null) {
+           if(!getTypeFromExp(ctx.exp(0)).equals("boolean")) {
+              System.err.println("If must have a boolean exp");
+              System.exit(1);
+           }
         }
-        if(ctx.ID() != null) {
-            String type = getTypeFromId(ctx.ID());
-            System.out.println(type);
+        if(ctx.ASSIGNMENT() != null) {
+            if(!getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(0)))) {
+                System.err.println("Cannot assign to different types");
+                System.exit(1);
+            }
+        }
+        if(ctx.LEFTBRACKET() != null) {
+            if(!ctx.exp(0).equals("int") || !getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(1)))) {
+                System.err.println("Bracket assignment wrong!");
+                System.exit(1);
+            }
         }
     }
+
 
     @Override public void enterClassdecl(@NotNull javagrammarParser.ClassdeclContext ctx) {
         System.err.println("Entering classdecl");
@@ -90,6 +102,11 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
     @Override public void enterMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
         System.err.println("Entering methoddecl");
         methodVariables.clear();
+
+        if(!ctx.type().getText().equals(getTypeFromExp(ctx.exp()))) {
+            System.err.println("You have to return an item of the same type as the method");
+            System.exit(1);
+        }
     }
 
     @Override public void exitMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
