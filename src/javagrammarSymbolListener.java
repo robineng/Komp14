@@ -13,6 +13,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
     private  HashMap<String, String> methodVariables;
     private javagrammarParser.MainclassContext mainclass;
     private final HashMap<String, javagrammarParser.ClassdeclContext> classes;
+    private javagrammarParser.ClassdeclContext currClass = null;
 
     public javagrammarSymbolListener(){
         super();
@@ -65,25 +66,47 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
 
     @Override public void enterStmt(@NotNull javagrammarParser.StmtContext ctx) {
         System.err.println("Entering stmt");
-        if(ctx.ID() != null) {
-            String type = getTypeFromId(ctx.ID());
-            System.out.println(type);
+        if(ctx.IF() != null || ctx.WHILE() != null) {
+           if(!getTypeFromExp(ctx.exp(0)).equals("boolean")) {
+              System.err.println("If must have a boolean exp");
+              System.exit(1);
+           }
+        }
+        if(ctx.ASSIGNMENT() != null) {
+            if(!getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(0)))) {
+                System.err.println("Cannot assign to different types");
+                System.exit(1);
+            }
+        }
+        if(ctx.LEFTBRACKET() != null) {
+            if(!ctx.exp(0).equals("int") || !getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(1)))) {
+                System.err.println("Bracket assignment wrong!");
+                System.exit(1);
+            }
         }
     }
 
+
     @Override public void enterClassdecl(@NotNull javagrammarParser.ClassdeclContext ctx) {
         System.err.println("Entering classdecl");
+        currClass = ctx;
         classVariables.clear();
     }
 
     @Override public void exitClassdecl(@NotNull javagrammarParser.ClassdeclContext ctx) {
         System.err.println("Exiting classdecl");
+        currClass = null;
         classVariables.clear();
     }
 
     @Override public void enterMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
         System.err.println("Entering methoddecl");
         methodVariables.clear();
+
+        if(!ctx.type().getText().equals(getTypeFromExp(ctx.exp()))) {
+            System.err.println("You have to return an item of the same type as the method");
+            System.exit(1);
+        }
     }
 
     @Override public void exitMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
@@ -104,20 +127,99 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
      * Return the type.
      */
     private String getTypeFromExp(javagrammarParser.ExpContext exp) {
-        if(exp.exp() != null) {
-            return null;
-        }
-        if(exp.ID() != null && idAlreadyInCurrentContext(exp.ID())) {
-            if(exp.NEW() != null) {
-                return exp.ID().getText();
-            } else {
-                return getTypeFromId(exp.ID());
-            }
-        } else if(exp.INT_LIT() != null) {
+        System.err.println(exp.getText());
+        /*
+         * Every expression that makes it immediately obvious what type it is.
+         */
+        if(exp.INT_LIT() != null) {
             return "int";
+        } else if (exp.LONG_LIT() != null) {
+            return "long";
         } else if(exp.TRUE() != null || exp.FALSE() != null) {
             return "boolean";
+        } else if(exp.THIS() != null) {
+            if(currClass == null) {
+                return mainclass.ID(0).getText();
+            } else {
+                return currClass.ID().getText();
+            }
+        } else if(exp.NEW() != null) {
+            if(exp.INT() != null && getTypeFromExp(exp.exp(0)).equals("int")) {
+                return "int[]";
+            } else if(classes.containsKey(exp.ID())) {
+                return exp.ID().getText();
+            } else {
+                System.err.println("Cannot create instance of " + exp.ID().getText());
+                System.exit(1);
+            }
+        } else if(exp.NOT() != null) {
+            if(getTypeFromId(exp.exp(0).ID()).equals("boolean")) {
+                return "boolean";
+            } else {
+                System.err.println("Cannot negate a non boolean value");
+                System.exit(1);
+            }
         }
+        //Just an ID, nothing else
+        else if(exp.ID().getText().equals(exp.getText())) {
+            return getTypeFromId(exp.ID());
+        }
+
+        /*
+         * Other expressions that aren't as obvious and might need some calculations
+         * to know which type to return.
+         */
+
+        else if((exp.MULT() != null) || (exp.MINUS() != null) || (exp.PLUS() != null)) {
+            //Could be either long or int
+            String numtype = getTypeFromExp(exp.exp(0));
+            if(numtype.matches("int|long") && numtype.equals(getTypeFromExp(exp.exp(1)))) {
+                return numtype;
+            } else {
+                System.err.println("Both expression must be either long or int.");
+                System.exit(1);
+            }
+        } else if((exp.MEQ() != null) || (exp.EQ() != null) || (exp.LEQ() != null)) {
+            String exptype = getTypeFromExp(exp.exp(0));
+            if(exptype.matches("int|long|boolean|int\\[\\]|long\\[\\]")) {
+                if(exptype.equals(getTypeFromExp(exp.exp(1)))) {
+                    return "boolean";
+                }
+            } else if (!getTypeFromExp(exp.exp(1)).matches("int|long|boolean|int\\[\\]|long\\[\\]")) {
+               return "boolean";
+            }
+            System.err.println("Cannot compare these types");
+            System.exit(1);
+        } else if(exp.LENGTH() != null) {
+            if(getTypeFromExp(exp.exp(0)).matches("int\\[\\]|long\\[\\]")) {
+                return "int";
+            }
+            System.err.println("Can not get the length of this object");
+            System.exit(1);
+        }
+        //There should now ONLY be exp.id left.
+        //Else something has gone wrong
+        else if(exp.ID() != null) {
+            //This will be a class name if the writer of the program did it right
+            String type = getTypeFromExp(exp.exp(0));
+            //Mainclass can't hold any methods so we'll just check other classes
+            javagrammarParser.ClassdeclContext expclass = classes.get(type);
+            for(javagrammarParser.MethoddeclContext method : expclass.methoddecl()) {
+                //Found the method
+                if(method.ID().getText().equals(exp.ID().getText())) {
+                    return method.type().getText();
+                }
+            }
+            System.err.println("Can't find the method");
+            System.exit(1);
+        }
+
+        /*
+         * If we reach this point, we have made a mistake.
+         */
+        System.err.println("Something has gone terribly wrong in getTypeFromExp");
+        System.err.println("Check it out!");
+        System.exit(1);
         return null;
     }
 
