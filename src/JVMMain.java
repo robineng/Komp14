@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * Created by suicidal on 3/18/14.
  */
-public class Main {
+public class JVMMain {
     public static void main(String[] args) {
         try {
             javagrammarLexer lexer = new javagrammarLexer(new ANTLRInputStream(new FileInputStream(args[0])));
