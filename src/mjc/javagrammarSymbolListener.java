@@ -1,9 +1,10 @@
+package mjc;
+
 import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.HashMap;
-import java.util.Stack;
 
 public class javagrammarSymbolListener extends javagrammarBaseListener{
 
