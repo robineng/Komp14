@@ -25,7 +25,6 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
 
 
     @Override public void enterProgram(@NotNull javagrammarParser.ProgramContext ctx) {
-        System.err.println("Entering program");
         mainclass = ctx.mainclass();
         for(javagrammarParser.ClassdeclContext currclass : ctx.classdecl()) {
             if(!classes.containsKey(currclass.ID().getText()) && !mainclass.ID(0).getText().equals(currclass.ID().getText())) {
@@ -38,19 +37,16 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
     }
 
     @Override public void enterMainclass(@NotNull javagrammarParser.MainclassContext ctx) {
-        System.err.println("Entering main");
         //Make sure that we have a hashmap to store variables in
         classVariables.clear();
     }
 
     @Override public void exitMainclass(@NotNull javagrammarParser.MainclassContext ctx) {
-        System.err.println("Exiting main");
         //Remove all mainclasses variables
         classVariables.clear();
     }
 
     @Override public void enterVardecl(@NotNull javagrammarParser.VardeclContext ctx) {
-        System.err.println("Entering vardecl");
         if(idAlreadyInCurrentContext(ctx.ID())) {
             System.err.println("ID " + ctx.ID() + " already defined");
             System.exit(1);
@@ -66,7 +62,6 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
     }
 
     @Override public void enterStmt(@NotNull javagrammarParser.StmtContext ctx) {
-        System.err.println("Entering stmt");
         if(ctx.IF() != null || ctx.WHILE() != null) {
            if(!getTypeFromExp(ctx.exp(0)).equals("boolean")) {
               System.err.println("If must have a boolean exp");
@@ -89,26 +84,22 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
 
 
     @Override public void enterClassdecl(@NotNull javagrammarParser.ClassdeclContext ctx) {
-        System.err.println("Entering classdecl");
         currClass = ctx;
         classVariables.clear();
     }
 
     @Override public void exitClassdecl(@NotNull javagrammarParser.ClassdeclContext ctx) {
-        System.err.println("Exiting classdecl");
         currClass = null;
         classVariables.clear();
     }
 
     @Override public void enterMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
-        System.err.println("Entering methoddecl");
         methodVariables.clear();
 
     }
 
     @Override public void enterFormallist(@NotNull javagrammarParser.FormallistContext ctx) {
         if(ctx.type() != null) {
-            System.err.println("Entering formallist");
             if(!idAlreadyInCurrentContext(ctx.ID())) {
                 methodVariables.put(ctx.ID().getText(), ctx.type().getText());
             } else {
@@ -134,11 +125,9 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             System.exit(1);
         }
         methodVariables.clear();
-        System.err.println("Exiting methoddecl");
     }
 
     @Override public void enterType(@NotNull javagrammarParser.TypeContext ctx) {
-        System.err.println("Entering type");
         if(ctx.ID() != null && !classes.containsKey(ctx.ID().getText())) {
             System.err.println("Class " + ctx.ID().getText() + " does not exist");
             System.exit(1);
@@ -224,9 +213,6 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             System.err.println("Cannot compare these types");
             System.exit(1);
         } else if(exp.LENGTH() != null) {
-            for(String s : methodVariables.keySet()) {
-                System.err.println(s + " " + methodVariables.get(s));
-            }
             if(getTypeFromExp(exp.exp(0)).matches("int\\[]|long\\[]")) {
                 return "int";
             }
@@ -269,15 +255,13 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
      * If no matching id can be found, exit the compiler.
      */
     private String getTypeFromId(TerminalNode id) {
-        System.out.println("getting type from id :");
-        System.out.println(id.getText());
         if(classVariables.containsKey(id.getText())) {
             return classVariables.get(id.getText());
         }
         else if(methodVariables.containsKey(id.getText())) {
             return methodVariables.get(id.getText());
         }
-        System.out.println("Cannot find id : " + id.getText());
+        System.err.println("Cannot find id : " + id.getText());
         System.exit(1);
         return null;
     }
