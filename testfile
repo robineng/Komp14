@@ -15,17 +15,18 @@ class mullenu {
   }
 
   public boolean areYouSecretelyAnFBIAgentQuestionMark () {
-    if(jaghatarmajs   . length ) {} else {}
     int[] a;
     int tretton;
+    int[] c;
     tretton = 13;
     tretton = tretton;
+    if(c   . length == 2 ) {} else {}
     return false;
   }
 }
 
 class Kravan {
   public boolean opTest(){
-    return 1+2*3 < 3-2*1 || 10<9 && true;
+    return (1+2*3) < (3-2*1);
   }
 }
