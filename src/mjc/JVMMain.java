@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -22,6 +23,8 @@ public class JVMMain {
             ParseTreeWalker walker = new ParseTreeWalker();
             javagrammarSymbolListener listener = new javagrammarSymbolListener();
             walker.walk(listener, context);
+            File f = new File(args[0].substring(0, args[0].indexOf(".")) + ".class");
+            f.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
