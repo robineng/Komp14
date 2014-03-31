@@ -44,7 +44,7 @@
   </target>
 
   <target name="main" depends="compile, jar">
-    <description>Main target</description>
+    <description>JVMMain target</description>
   </target>
 
 </project> 
