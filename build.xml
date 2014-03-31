@@ -19,21 +19,25 @@
     <mkdir dir="${dist.dir}" />
   </target>
 
+    <path id="classpath">
+        <fileset dir="${lib.dir}" />
+    </path>
   <!-- Compiles the java code (including the usage of library for JUnit -->
   <target name="compile" depends="clean, makedir">
-    <javac srcdir="${src.dir}" destdir="${build.dir}">
+      <javac srcdir="${src.dir}" destdir="${build.dir}">
+          <classpath refid="classpath"/>
     </javac>
 
   </target>
 
   <!--Creates the deployable jar file  -->
   <target name="jar" depends="compile">
-      <manifest file="${dist.dir}/MANIFEST.MF">
+      <manifest file="MANIFEST.MF">
         <attribute name="Main-Class" 
                    value="Main" />
       </manifest>
-      <jar destfile="${dist.dir}/mjc.jar" 
-           manifest="${dist.dir}/MANIFEST.MF">
+      <jar destfile="mjc.jar"
+           manifest="MANIFEST.MF">
            <fileset dir="${build.dir}" />
            <zipgroupfileset dir="${lib.dir}" includes="**/*.jar" />
     </jar>
