@@ -104,15 +104,37 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
         System.err.println("Entering methoddecl");
         methodVariables.clear();
 
-        if(!ctx.type().getText().equals(getTypeFromExp(ctx.exp()))) {
-            System.err.println("You have to return an item of the same type as the method");
-            System.exit(1);
+    }
+
+    @Override public void enterFormallist(@NotNull javagrammarParser.FormallistContext ctx) {
+        if(ctx.type() != null) {
+            System.err.println("Entering formallist");
+            if(!idAlreadyInCurrentContext(ctx.ID())) {
+                methodVariables.put(ctx.ID().getText(), ctx.type().getText());
+            } else {
+                System.err.println("Cannot redefine variable");
+                System.exit(1);
+            }
+            if(ctx.formalrest() != null) {
+                for(javagrammarParser.FormalrestContext rest : ctx.formalrest()) {
+                    if(!idAlreadyInCurrentContext(rest.ID())) {
+                        addNewIdToContext(ctx.ID(), ctx.type().getText(), ctx.parent);
+                    } else {
+                        System.err.println("Cannot redefine a variable");
+                        System.exit(1);
+                    }
+                }
+            }
         }
     }
 
     @Override public void exitMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
-        System.err.println("Exiting methoddecl");
+        if(!ctx.type().getText().equals(getTypeFromExp(ctx.exp()))) {
+            System.err.println("You have to return an item of the same type as the method");
+            System.exit(1);
+        }
         methodVariables.clear();
+        System.err.println("Exiting methoddecl");
     }
 
     @Override public void enterType(@NotNull javagrammarParser.TypeContext ctx) {
@@ -128,7 +150,6 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
      * Return the type.
      */
     private String getTypeFromExp(javagrammarParser.ExpContext exp) {
-        System.err.println(exp.getText());
         /*
          * Every expression that makes it immediately obvious what type it is.
          */
@@ -160,9 +181,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
                 System.err.println("Cannot negate a non boolean value");
                 System.exit(1);
             }
-        }
-        //Just an ID, nothing else
-        else if(exp.ID().getText().equals(exp.getText())) {
+        } else if(exp.ID() != null && exp.DOT() == null) {
             return getTypeFromId(exp.ID());
         }
 
@@ -170,6 +189,15 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
          * Other expressions that aren't as obvious and might need some calculations
          * to know which type to return.
          */
+        else if(exp.AND() != null || exp.OR() != null) {
+            if(getTypeFromExp(exp.exp(0)).equals("boolean") && getTypeFromExp(exp.exp(1)).equals("boolean")) {
+                return "boolean";
+            }
+            else {
+                System.err.println("Both sides of AND or OR must be boolean");
+                System.exit(1);
+            }
+        }
 
         else if((exp.MULT() != null) || (exp.MINUS() != null) || (exp.PLUS() != null)) {
             //Could be either long or int
@@ -180,19 +208,26 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
                 System.err.println("Both expression must be either long or int.");
                 System.exit(1);
             }
-        } else if((exp.MEQ() != null) || (exp.EQ() != null) || (exp.LEQ() != null)) {
+        } else if((exp.MEQ() != null) || (exp.EQ() != null) || (exp.LEQ() != null) || exp.LESSTHAN()!=null
+                || exp.MORETHAN() != null) {
             String exptype = getTypeFromExp(exp.exp(0));
             if(exptype.matches("int|long|boolean|int\\[\\]|long\\[\\]")) {
                 if(exptype.equals(getTypeFromExp(exp.exp(1)))) {
                     return "boolean";
                 }
-            } else if (!getTypeFromExp(exp.exp(1)).matches("int|long|boolean|int\\[\\]|long\\[\\]")) {
+            }
+            //If exp(0) is a pointer, then we can compare it to any other pointer.
+            //Therefore make sure that exp(1) is not a primitive type
+            else if (!getTypeFromExp(exp.exp(1)).matches("int|long|boolean|int\\[\\]|long\\[\\]")) {
                return "boolean";
             }
             System.err.println("Cannot compare these types");
             System.exit(1);
         } else if(exp.LENGTH() != null) {
-            if(getTypeFromExp(exp.exp(0)).matches("int\\[\\]|long\\[\\]")) {
+            for(String s : methodVariables.keySet()) {
+                System.err.println(s + " " + methodVariables.get(s));
+            }
+            if(getTypeFromExp(exp.exp(0)).matches("int\\[]|long\\[]")) {
                 return "int";
             }
             System.err.println("Can not get the length of this object");
@@ -215,11 +250,16 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             System.exit(1);
         }
 
+        //If an exp is within brackets (exp)
+        if(exp.LEFTPAREN() != null) {
+            return getTypeFromExp(exp.exp(0));
+        }
         /*
          * If we reach this point, we have made a mistake.
          */
         System.err.println("Something has gone terribly wrong in getTypeFromExp");
         System.err.println("Check it out!");
+        System.err.println(exp.getText());
         System.exit(1);
         return null;
     }
