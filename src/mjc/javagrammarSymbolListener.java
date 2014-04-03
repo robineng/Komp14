@@ -95,7 +95,6 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
 
     @Override public void enterMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
         methodVariables.clear();
-
     }
 
     @Override public void enterFormallist(@NotNull javagrammarParser.FormallistContext ctx) {
