@@ -70,7 +70,8 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
         }
         if(ctx.ASSIGNMENT() != null) {
             if(!getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(0)))) {
-                System.err.println("Cannot assign to different types");
+                System.err.println("Cannot assign " + getTypeFromExp(ctx.exp(0)) + " to " + getTypeFromId(ctx.ID()) +
+                        " variable on line " + ctx.ID().getSymbol().getLine());
                 System.exit(1);
             }
         }
