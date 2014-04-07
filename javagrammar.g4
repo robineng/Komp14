@@ -1,5 +1,9 @@
 grammar javagrammar;
 
+@header {
+    package mjc;
+}
+
 options
 {
   language = Java;
@@ -8,6 +12,7 @@ options
 //LEXER RULES!
 //Skip whitespace
 WS : [ \t\r\n]+ -> skip;
+COMMENT : '/*'.*'*/' -> skip;
 //Reserved words
 CLASS : 'class';
 PUBLIC : 'public';

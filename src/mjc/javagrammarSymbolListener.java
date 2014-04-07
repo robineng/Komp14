@@ -13,7 +13,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
     private HashMap <String, String> classVariables;
     private  HashMap<String, String> methodVariables;
     private javagrammarParser.MainclassContext mainclass;
-    private final HashMap<String, javagrammarParser.ClassdeclContext> classes;
+    private HashMap<String, javagrammarParser.ClassdeclContext> classes;
     private javagrammarParser.ClassdeclContext currClass = null;
 
     public javagrammarSymbolListener(){
@@ -156,7 +156,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
         } else if(exp.NEW() != null) {
             if(exp.INT() != null && getTypeFromExp(exp.exp(0)).equals("int")) {
                 return "int[]";
-            } else if(classes.containsKey(exp.ID())) {
+            } else if(classes.containsKey(exp.ID().getText())) {
                 return exp.ID().getText();
             } else {
                 System.err.println("Cannot create instance of " + exp.ID().getText());

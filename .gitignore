@@ -7,3 +7,4 @@ docs/
 .idea/workspace.xml
 mjc.jar
 MANIFEST.MF
+*.j

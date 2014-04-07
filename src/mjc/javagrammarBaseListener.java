@@ -1,4 +1,7 @@
-package mjc;// Generated from javagrammar.g4 by ANTLR 4.2
+// Generated from javagrammar.g4 by ANTLR 4.2
+
+    package mjc;
+
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
