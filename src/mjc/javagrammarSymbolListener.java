@@ -105,15 +105,15 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
                 System.err.println("Cannot redefine variable at line " + ctx.ID().getSymbol().getLine());
                 System.exit(1);
             }
-            if(ctx.formalrest() != null) {
-                for(javagrammarParser.FormalrestContext rest : ctx.formalrest()) {
-                    if(!idAlreadyInCurrentContext(rest.ID())) {
-                        addNewIdToContext(ctx.ID(), ctx.type().getText(), ctx.parent);
-                    } else {
-                        System.err.println("Cannot redefine a variable");
-                        System.exit(1);
-                    }
-                }
+        }
+    }
+    @Override public void enterFormalrest(@NotNull javagrammarParser.FormalrestContext ctx){
+        if(ctx.type() != null) {
+            if(!idAlreadyInCurrentContext(ctx.ID())) {
+                methodVariables.put(ctx.ID().getText(), ctx.type().getText());
+            } else {
+                System.err.println("Cannot redefine variable at line " + ctx.ID().getSymbol().getLine());
+                System.exit(1);
             }
         }
     }
@@ -163,7 +163,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
                 System.exit(1);
             }
         } else if(exp.NOT() != null) {
-            if(getTypeFromId(exp.exp(0).ID()).equals("boolean")) {
+            if(getTypeFromExp(exp.exp(0)).equals("boolean")) {
                 return "boolean";
             } else {
                 System.err.println("Cannot negate a non boolean value");
@@ -260,7 +260,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
         else if(methodVariables.containsKey(id.getText())) {
             return methodVariables.get(id.getText());
         }
-        System.err.println("Cannot find id : " + id.getText());
+        System.err.println("Cannot find id : " + id.getText() + " at line " + id.getSymbol().getLine());
         System.exit(1);
         return null;
     }
