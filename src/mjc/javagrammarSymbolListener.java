@@ -102,7 +102,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             if(!idAlreadyInCurrentContext(ctx.ID())) {
                 methodVariables.put(ctx.ID().getText(), ctx.type().getText());
             } else {
-                System.err.println("Cannot redefine variable");
+                System.err.println("Cannot redefine variable at line " + ctx.ID().getSymbol().getLine());
                 System.exit(1);
             }
             if(ctx.formalrest() != null) {
@@ -266,7 +266,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
     }
 
     private boolean idAlreadyInCurrentContext(TerminalNode id) {
-        return classVariables.containsKey(id.getText()) || methodVariables.containsKey(id.getText());
+        return methodVariables.containsKey(id.getText());
     }
 
     private void addNewIdToContext(TerminalNode id, String type, RuleContext rc) {
