@@ -12,7 +12,8 @@ options
 //LEXER RULES!
 //Skip whitespace
 WS : [ \t\r\n]+ -> skip;
-COMMENT : '/*'.*'*/' -> skip;
+COMMENT1 : '//'.*?[\n] -> skip;
+COMMENT2 : '/*'.*?'*/' -> skip;
 //Reserved words
 CLASS : 'class';
 PUBLIC : 'public';
