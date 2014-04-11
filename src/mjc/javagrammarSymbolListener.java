@@ -209,8 +209,11 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
         } else if((exp.MEQ() != null) || (exp.EQ() != null) || (exp.LEQ() != null) || (exp.LESSTHAN() != null)
                 || (exp.MORETHAN() != null)) {
             String exptype = getTypeFromExp(exp.exp(0));
+            String exptype2 = getTypeFromExp(exp.exp(1));
             if(exptype.matches("int|long|boolean|int\\[\\]|long\\[\\]")) {
-                if(exptype.equals(getTypeFromExp(exp.exp(1)))) {
+                if(exptype.equals(exptype2)) {
+                    return "boolean";
+                }else if((exptype.equals("int") || exptype.equals("long")) && (exptype2.equals("int") || exptype2.equals("long"))){
                     return "boolean";
                 }
             }
