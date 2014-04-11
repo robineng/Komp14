@@ -82,19 +82,14 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
                     System.exit(1);
                 }
             }
-        }
-        else if(!getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(0)))) {
-            System.err.println("Cannot assign " + getTypeFromExp(ctx.exp(0)) + " to " + getTypeFromId(ctx.ID()) +
-                    " variable on line " + ctx.ID().getSymbol().getLine());
-            System.exit(1);
-        }
 
-        else if(ctx.LEFTBRACKET() != null) {
-            if(!ctx.exp(0).equals("int") || !getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(1)))) {
-                System.err.println("Bracket assignment wrong!");
+            else if(!getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(0)))) {
+                System.err.println("Cannot assign " + getTypeFromExp(ctx.exp(0)) + " to " + getTypeFromId(ctx.ID()) +
+                        " variable on line " + ctx.ID().getSymbol().getLine());
                 System.exit(1);
             }
         }
+
     }
 
 
