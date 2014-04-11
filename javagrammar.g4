@@ -97,13 +97,13 @@ stmt : LEFTBRACE (stmt)* RIGHTBRACE |
        ID ASSIGNMENT exp SEMICOLON|
        ID LEFTBRACKET exp RIGHTBRACKET ASSIGNMENT exp SEMICOLON;
 
-exp : exp MULT exp|
+exp : exp LEFTBRACKET exp RIGHTBRACKET|
+      exp MULT exp|
       exp (MINUS|PLUS) exp|
       exp (MEQ|LEQ|MORETHAN|LESSTHAN) exp|
       exp (EQ|NEQ) exp|
       exp AND exp|
       exp OR exp|
-      exp LEFTBRACKET exp RIGHTBRACKET|
       exp DOT LENGTH|
       exp DOT ID LEFTPAREN explist RIGHTPAREN|
       INT_LIT|

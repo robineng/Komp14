@@ -75,7 +75,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
                     System.err.println("Invalid index of array at line " + ctx.ID().getSymbol().getLine());
                     System.exit(1);
                 }
-                String arrayType = getTypeFromId(ctx.ID()).split("\\[")[0];
+                String arrayType = getTypeFromArrayId(ctx.ID());
                 if(!arrayType.equals(getTypeFromExp(ctx.exp(1)))){
                     System.err.println("Cannot assign " + getTypeFromExp(ctx.exp(1)) + " to " + arrayType +
                             " array on line " + ctx.ID().getSymbol().getLine());
@@ -147,7 +147,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
      * Go through an ```Exp´´´ and find what type it results in in the end.
      * Return the type.
      */
-    private String getTypeFromExp(javagrammarParser.ExpContext exp) {
+    private String getTypeFromExp(javagrammarParser.ExpContext exp) {;
         /*
          * Every expression that makes it immediately obvious what type it is.
          */
@@ -206,8 +206,8 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
                 System.err.println("Both expression must be either long or int.");
                 System.exit(1);
             }
-        } else if((exp.MEQ() != null) || (exp.EQ() != null) || (exp.LEQ() != null) || exp.LESSTHAN()!=null
-                || exp.MORETHAN() != null) {
+        } else if((exp.MEQ() != null) || (exp.EQ() != null) || (exp.LEQ() != null) || (exp.LESSTHAN() != null)
+                || (exp.MORETHAN() != null)) {
             String exptype = getTypeFromExp(exp.exp(0));
             if(exptype.matches("int|long|boolean|int\\[\\]|long\\[\\]")) {
                 if(exptype.equals(getTypeFromExp(exp.exp(1)))) {
@@ -219,13 +219,19 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             else if (!getTypeFromExp(exp.exp(1)).matches("int|long|boolean|int\\[\\]|long\\[\\]")) {
                return "boolean";
             }
-            System.err.println("Cannot compare these types");
+            System.err.println("Cannot compare " + exptype + " with " + getTypeFromExp(exp.exp(1)));
             System.exit(1);
         } else if(exp.LENGTH() != null) {
             if(getTypeFromExp(exp.exp(0)).matches("int\\[]|long\\[]")) {
                 return "int";
             }
             System.err.println("Can not get the length of this object");
+            System.exit(1);
+        } else if(exp.exp().size() == 2 && exp.LEFTBRACKET() != null){
+            if(getTypeFromExp(exp.exp(1)).equals("int")){
+                return getArrayTypeFromExp(exp.exp(0));
+            }
+            System.err.println("Invalid index of array at line: " + exp.LEFTBRACKET().getSymbol().getLine());
             System.exit(1);
         }
         //There should now ONLY be exp.id left.
@@ -273,6 +279,19 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
         System.err.println("Cannot find id : " + id.getText() + " at line " + id.getSymbol().getLine());
         System.exit(1);
         return null;
+    }
+
+    /**
+     * Gets the type of the objects an array i storing
+     * @param id the id of the array
+     * @return String representing the type
+     */
+    private String getTypeFromArrayId(TerminalNode id){
+        return getTypeFromId(id).split("\\[")[0];
+    }
+
+    private String getArrayTypeFromExp(javagrammarParser.ExpContext exp){
+        return getTypeFromExp(exp).split("\\[")[0];
     }
 
     private boolean idAlreadyInCurrentContext(TerminalNode id) {
