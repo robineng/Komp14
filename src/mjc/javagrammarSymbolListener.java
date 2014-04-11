@@ -77,16 +77,20 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
                 }
                 String arrayType = getTypeFromArrayId(ctx.ID());
                 if(!arrayType.equals(getTypeFromExp(ctx.exp(1)))){
-                    System.err.println("Cannot assign " + getTypeFromExp(ctx.exp(1)) + " to " + arrayType +
-                            " array on line " + ctx.ID().getSymbol().getLine());
-                    System.exit(1);
+                    if(!(arrayType.equals("long") && getTypeFromExp(ctx.exp(0)).equals("int"))){
+                        System.err.println("Cannot assign " + getTypeFromExp(ctx.exp(1)) + " to " + arrayType +
+                              " array on line " + ctx.ID().getSymbol().getLine());
+                        System.exit(1);
+                    }
                 }
             }
 
             else if(!getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(0)))) {
-                System.err.println("Cannot assign " + getTypeFromExp(ctx.exp(0)) + " to " + getTypeFromId(ctx.ID()) +
-                        " variable on line " + ctx.ID().getSymbol().getLine());
-                System.exit(1);
+                if(!(getTypeFromId(ctx.ID()).equals("long") && getTypeFromExp(ctx.exp(0)).equals("int"))){
+                    System.err.println("Cannot assign " + getTypeFromExp(ctx.exp(0)) + " to " + getTypeFromId(ctx.ID()) +
+                            " variable on line " + ctx.ID().getSymbol().getLine());
+                    System.exit(1);
+                }
             }
         }
 
@@ -166,6 +170,8 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
         } else if(exp.NEW() != null) {
             if(exp.INT() != null && getTypeFromExp(exp.exp(0)).equals("int")) {
                 return "int[]";
+            } else if(exp.LONG() != null) {
+                return "long[]";
             } else if(classes.containsKey(exp.ID().getText())) {
                 return exp.ID().getText();
             } else {
