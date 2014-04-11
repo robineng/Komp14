@@ -71,7 +71,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
         if(ctx.ASSIGNMENT() != null) {
             //If assigment to index of array
             if(ctx.exp().size() == 2){
-                if(ctx.exp(0).INT_LIT() == null || !getTypeFromExp(ctx.exp(0)).equals("int")){
+                if(ctx.exp(0).INT_LIT() == null && !getTypeFromExp(ctx.exp(0)).equals("int")){
                     System.err.println("Invalid index of array at line " + ctx.ID().getSymbol().getLine());
                     System.exit(1);
                 }

@@ -8,6 +8,6 @@ class bla {
     int[] y;
     x = 3;
     y = new int[5];
-    y[2] = 5;
+    y[3] = 5;
   }
 }
