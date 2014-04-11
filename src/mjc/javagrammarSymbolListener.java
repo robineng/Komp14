@@ -69,13 +69,27 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
            }
         }
         if(ctx.ASSIGNMENT() != null) {
-            if(!getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(0)))) {
-                System.err.println("Cannot assign " + getTypeFromExp(ctx.exp(0)) + " to " + getTypeFromId(ctx.ID()) +
-                        " variable on line " + ctx.ID().getSymbol().getLine());
-                System.exit(1);
+            //If assigment to index of array
+            if(ctx.exp().size() == 2){
+                if(ctx.exp(0).INT_LIT() == null){
+                    System.err.println("Invalid index of array at line " + ctx.ID().getSymbol().getLine());
+                    System.exit(1);
+                }
+                String arrayType = getTypeFromId(ctx.ID()).split("\\[")[0];
+                if(!arrayType.equals(getTypeFromExp(ctx.exp(1)))){
+                    System.err.println("Cannot assign " + getTypeFromExp(ctx.exp(1)) + " to " + arrayType +
+                            " array on line " + ctx.ID().getSymbol().getLine());
+                    System.exit(1);
+                }
             }
         }
-        if(ctx.LEFTBRACKET() != null) {
+        else if(!getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(0)))) {
+            System.err.println("Cannot assign " + getTypeFromExp(ctx.exp(0)) + " to " + getTypeFromId(ctx.ID()) +
+                    " variable on line " + ctx.ID().getSymbol().getLine());
+            System.exit(1);
+        }
+
+        else if(ctx.LEFTBRACKET() != null) {
             if(!ctx.exp(0).equals("int") || !getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(1)))) {
                 System.err.println("Bracket assignment wrong!");
                 System.exit(1);
