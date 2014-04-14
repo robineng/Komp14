@@ -103,6 +103,7 @@ exp : NEW INT LEFTBRACKET exp RIGHTBRACKET|
       exp DOT LENGTH|
       exp DOT ID LEFTPAREN explist RIGHTPAREN|
       exp LEFTBRACKET exp RIGHTBRACKET|
+      LEFTPAREN exp RIGHTPAREN|
       exp MULT exp|
       exp (MINUS|PLUS) exp|
       NOT exp|
@@ -115,8 +116,8 @@ exp : NEW INT LEFTBRACKET exp RIGHTBRACKET|
       TRUE|
       FALSE|
       ID|
-      THIS|
-      LEFTPAREN exp RIGHTPAREN;
+      THIS;
+
 
 //op : MULT|
 //     MINUS|

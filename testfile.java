@@ -5,11 +5,11 @@
 class bla {
   public static void main(String[] args) {
     int x;
-    int[] z;
+    boolean b;
+      int[] z;
       kek k;
       k = new kek();
-
-
+    b = x + 1 < z[5];
     x = k.givearray()[k.givearray()[z[new int[10][2]]]] + 1;
   }
 }
