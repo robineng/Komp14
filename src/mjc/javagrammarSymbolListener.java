@@ -198,7 +198,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
                 return "boolean";
             }
             else {
-                System.err.println("Both sides of AND or OR must be boolean");
+                System.err.printf("Both sides of AND or OR must be boolean, %s\n",exp.getText());
                 System.exit(1);
             }
         }

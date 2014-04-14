@@ -19,5 +19,8 @@ class bla {
     b = l<x;
     l = x;
     la[2] = x;
+    b = true && false;
+    b = b || true;
+
   }
 }
