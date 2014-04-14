@@ -65,11 +65,11 @@ TRUE : 'true';
 FALSE : 'false';
 INT_LIT : '0' | ('1'..'9')('0'..'9')*;
 LONG_LIT : '0'('l'|'L') | ('1'..'9')('0'..'9')*('l'|'L');
-ID : ('a'..'z'|'A'..'Z')('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
+ID : ('a'..'z'|'A'..'Z'|'_')('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
 
 //Parser rules!
 program : mainclass (classdecl)*;
-mainclass : CLASS ID LEFTBRACE PUBLIC STATIC VOID 'main' LEFTPAREN STRING 
+mainclass : CLASS ID LEFTBRACE PUBLIC STATIC VOID 'main' LEFTPAREN STRING
             LEFTBRACKET RIGHTBRACKET ID RIGHTPAREN LEFTBRACE (vardecl)* (stmt)* RIGHTBRACE RIGHTBRACE;
 
 classdecl : CLASS ID LEFTBRACE (vardecl)* (methoddecl)* RIGHTBRACE;

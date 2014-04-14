@@ -6,6 +6,7 @@ class bla {
   public static void main(String[] args) {
     int x;
     int[] y;
+    int _main;
     boolean b;
     long l;
     long[] la;
