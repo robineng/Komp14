@@ -295,11 +295,10 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
      * If no matching id can be found, exit the compiler.
      */
     private String getTypeFromId(TerminalNode id) {
-        if(classVariables.containsKey(id.getText())) {
-            return classVariables.get(id.getText());
-        }
-        else if(methodVariables.containsKey(id.getText())) {
+        if(methodVariables.containsKey(id.getText())) {
             return methodVariables.get(id.getText());
+        }else if(classVariables.containsKey(id.getText())) {
+            return classVariables.get(id.getText());
         }
 
 

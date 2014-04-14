@@ -6,11 +6,12 @@ class bla {
   public static void main(String[] args) {
     int x;
     boolean b;
-      int[] z;
-      kek k;
-      k = new kek();
+    int[] z;
+    kek k;
+    k = new kek();
     b = x + 1 < z[5];
-    x = k.givearray()[k.givearray()[z[new int[10][2]]]] + 1;
+    b = x*2+3<z[4]+z[3] && !(true || false) && !(z[2] >= z[3]);
+    x = k.givearray()[k.givearray()[z[new int[10][2] + 1]]] + 1;
   }
 }
 
