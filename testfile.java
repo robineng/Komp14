@@ -5,38 +5,12 @@
 class bla {
   public static void main(String[] args) {
     int x;
-    int[] y;
-    int _main;
-    boolean b;
-    long l;
-    long[] la;
-    int newpop;
-    newpop p;
-    kek k;
-    bla ble;
-    main a;
-    x = new kek().newrofl();
-    l = 23l;
-    x = 3;
-    p = new newpop();
-    x = p.s(10);
-    y = new int[5];
-    la = new long[5];
-    y[3] = 5;
-    b = 3<2;
-    b = x < y[3];
-    b = l<x;
-    l = x;
-    la[2] = x;
-    b = true && false;
-    b = b || true;
-    k = new kek();
-    ble = new bla();
-    x = k.lol(10);
-    b = k.truer();
-    x = k.newrofl();
-    newpop = 3;
+    int[] z;
+      kek k;
+      k = new kek();
 
+
+    x = k.givearray()[k.givearray()[z[new int[10][2]]]] + 1;
   }
 }
 
@@ -53,6 +27,10 @@ class kek {
         k = i;
         return k;
 
+    }
+
+    public int[] givearray(){
+        return new int[5];
     }
 
 

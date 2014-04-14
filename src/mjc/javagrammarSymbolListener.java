@@ -215,9 +215,10 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
                 return numtype;
             }
             else {
-                System.err.printf("Both expression must be either long or int. Exp 1: %s, Exp 2: %s, Whole exp: %s\n",
+                System.err.printf("Both expressions must be either long or int. Exp 1: %s, Exp 2: %s, Whole exp: %s\n",
                         getTypeFromExp(exp.exp(0)), getTypeFromExp(exp.exp(1)), exp.getText());
                 System.exit(1);
+                System.err.printf("in %s\n",exp.parent.getText());
             }
         } else if((exp.MEQ() != null) || (exp.NEQ() != null) || (exp.EQ() != null) || (exp.LEQ() != null) || (exp.LESSTHAN() != null)
                 || (exp.MORETHAN() != null)) {
