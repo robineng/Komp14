@@ -69,7 +69,7 @@ ID : ('a'..'z'|'A'..'Z'|'_')('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
 
 //Parser rules!
 program : mainclass (classdecl)*;
-mainclass : CLASS ID LEFTBRACE PUBLIC STATIC VOID 'main' LEFTPAREN STRING
+mainclass : CLASS ID LEFTBRACE PUBLIC STATIC VOID {_input.LT(1).getText().matches("main")}? ID LEFTPAREN STRING
             LEFTBRACKET RIGHTBRACKET ID RIGHTPAREN LEFTBRACE (vardecl)* (stmt)* RIGHTBRACE RIGHTBRACE;
 
 classdecl : CLASS ID LEFTBRACE (vardecl)* (methoddecl)* RIGHTBRACE;

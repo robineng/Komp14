@@ -14,6 +14,7 @@ class bla {
     newpop p;
     kek k;
     bla ble;
+    main a;
     x = new kek().newrofl();
     l = 23l;
     x = 3;
@@ -37,6 +38,10 @@ class bla {
     newpop = 3;
 
   }
+}
+
+class main {
+
 }
 
 class kek {
