@@ -97,26 +97,25 @@ stmt : LEFTBRACE (stmt)* RIGHTBRACE |
        ID ASSIGNMENT exp SEMICOLON|
        ID LEFTBRACKET exp RIGHTBRACKET ASSIGNMENT exp SEMICOLON;
 
-exp : exp DOT LENGTH|
+exp : NEW INT LEFTBRACKET exp RIGHTBRACKET|
+      NEW LONG LEFTBRACKET exp RIGHTBRACKET|
+      NEW ID LEFTPAREN RIGHTPAREN|
+      exp DOT LENGTH|
       exp DOT ID LEFTPAREN explist RIGHTPAREN|
       exp LEFTBRACKET exp RIGHTBRACKET|
       exp MULT exp|
       exp (MINUS|PLUS) exp|
+      NOT exp|
       exp (MEQ|LEQ|MORETHAN|LESSTHAN) exp|
       exp (EQ|NEQ) exp|
       exp AND exp|
       exp OR exp|
-
       INT_LIT|
       LONG_LIT|
       TRUE|
       FALSE|
       ID|
       THIS|
-      NEW INT LEFTBRACKET exp RIGHTBRACKET|
-      NEW LONG LEFTBRACKET exp RIGHTBRACKET|
-      NEW ID LEFTPAREN RIGHTPAREN|
-      NOT exp|
       LEFTPAREN exp RIGHTPAREN;
 
 //op : MULT|

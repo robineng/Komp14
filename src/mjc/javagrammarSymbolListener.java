@@ -253,7 +253,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             if(expType.equals("this")) {
                 return getTypeFromMethodId(exp.ID().getText(), currClass.ID().getText());
             } else {
-                return getTypeFromMethodId(exp.ID().getText(), getTypeFromId(exp.exp(0).ID()));
+                return getTypeFromMethodId(exp.ID().getText(), getTypeFromExp(exp.exp(0)));
             }
 
         } else if(exp.ID() != null) {

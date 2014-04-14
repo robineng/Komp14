@@ -13,6 +13,7 @@ class bla {
     newpop p;
     kek k;
     bla ble;
+    x = new kek().newrofl();
     l = 23l;
     x = 3;
     p = new newpop();
@@ -33,6 +34,7 @@ class bla {
     b = k.truer();
     x = k.newrofl();
     newpop = 3;
+
   }
 }
 

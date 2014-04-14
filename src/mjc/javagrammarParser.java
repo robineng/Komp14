@@ -815,16 +815,16 @@ public class javagrammarParser extends Parser {
 		public TerminalNode MEQ() { return getToken(javagrammarParser.MEQ, 0); }
 		public TerminalNode OR() { return getToken(javagrammarParser.OR, 0); }
 		public TerminalNode ID() { return getToken(javagrammarParser.ID, 0); }
+		public TerminalNode LONG() { return getToken(javagrammarParser.LONG, 0); }
 		public List<ExpContext> exp() {
 			return getRuleContexts(ExpContext.class);
 		}
-		public TerminalNode LONG() { return getToken(javagrammarParser.LONG, 0); }
 		public TerminalNode MINUS() { return getToken(javagrammarParser.MINUS, 0); }
 		public TerminalNode NEQ() { return getToken(javagrammarParser.NEQ, 0); }
 		public TerminalNode LEFTBRACKET() { return getToken(javagrammarParser.LEFTBRACKET, 0); }
 		public TerminalNode LESSTHAN() { return getToken(javagrammarParser.LESSTHAN, 0); }
-		public TerminalNode NEW() { return getToken(javagrammarParser.NEW, 0); }
 		public TerminalNode RIGHTPAREN() { return getToken(javagrammarParser.RIGHTPAREN, 0); }
+		public TerminalNode NEW() { return getToken(javagrammarParser.NEW, 0); }
 		public TerminalNode DOT() { return getToken(javagrammarParser.DOT, 0); }
 		public TerminalNode MULT() { return getToken(javagrammarParser.MULT, 0); }
 		public TerminalNode NOT() { return getToken(javagrammarParser.NOT, 0); }
@@ -833,8 +833,8 @@ public class javagrammarParser extends Parser {
 			return getRuleContext(ExpContext.class,i);
 		}
 		public TerminalNode LENGTH() { return getToken(javagrammarParser.LENGTH, 0); }
-		public TerminalNode THIS() { return getToken(javagrammarParser.THIS, 0); }
 		public TerminalNode FALSE() { return getToken(javagrammarParser.FALSE, 0); }
+		public TerminalNode THIS() { return getToken(javagrammarParser.THIS, 0); }
 		public ExpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -870,72 +870,72 @@ public class javagrammarParser extends Parser {
 			case 1:
 				{
 				setState(176); match(NOT);
-				setState(177); exp(2);
+				setState(177); exp(12);
 				}
 				break;
 
 			case 2:
 				{
-				setState(178); match(INT_LIT);
+				setState(178); match(NEW);
+				setState(179); match(INT);
+				setState(180); match(LEFTBRACKET);
+				setState(181); exp(0);
+				setState(182); match(RIGHTBRACKET);
 				}
 				break;
 
 			case 3:
 				{
-				setState(179); match(LONG_LIT);
-				}
-				break;
-
-			case 4:
-				{
-				setState(180); match(TRUE);
-				}
-				break;
-
-			case 5:
-				{
-				setState(181); match(FALSE);
-				}
-				break;
-
-			case 6:
-				{
-				setState(182); match(ID);
-				}
-				break;
-
-			case 7:
-				{
-				setState(183); match(THIS);
-				}
-				break;
-
-			case 8:
-				{
 				setState(184); match(NEW);
-				setState(185); match(INT);
+				setState(185); match(LONG);
 				setState(186); match(LEFTBRACKET);
 				setState(187); exp(0);
 				setState(188); match(RIGHTBRACKET);
 				}
 				break;
 
-			case 9:
+			case 4:
 				{
 				setState(190); match(NEW);
-				setState(191); match(LONG);
-				setState(192); match(LEFTBRACKET);
-				setState(193); exp(0);
-				setState(194); match(RIGHTBRACKET);
+				setState(191); match(ID);
+				setState(192); match(LEFTPAREN);
+				setState(193); match(RIGHTPAREN);
+				}
+				break;
+
+			case 5:
+				{
+				setState(194); match(INT_LIT);
+				}
+				break;
+
+			case 6:
+				{
+				setState(195); match(LONG_LIT);
+				}
+				break;
+
+			case 7:
+				{
+				setState(196); match(TRUE);
+				}
+				break;
+
+			case 8:
+				{
+				setState(197); match(FALSE);
+				}
+				break;
+
+			case 9:
+				{
+				setState(198); match(ID);
 				}
 				break;
 
 			case 10:
 				{
-				setState(196); match(NEW);
-				setState(197); match(ID);
-				setState(198); match(LEFTPAREN);
-				setState(199); match(RIGHTPAREN);
+				setState(199); match(THIS);
 				}
 				break;
 
@@ -963,9 +963,9 @@ public class javagrammarParser extends Parser {
 						_localctx = new ExpContext(_parentctx, _parentState);
 						pushNewRecursionContext(_localctx, _startState, RULE_exp);
 						setState(206);
-						if (!(precpred(_ctx, 17))) throw new FailedPredicateException(this, "precpred(_ctx, 17)");
+						if (!(precpred(_ctx, 14))) throw new FailedPredicateException(this, "precpred(_ctx, 14)");
 						setState(207); match(MULT);
-						setState(208); exp(18);
+						setState(208); exp(15);
 						}
 						break;
 
@@ -974,14 +974,14 @@ public class javagrammarParser extends Parser {
 						_localctx = new ExpContext(_parentctx, _parentState);
 						pushNewRecursionContext(_localctx, _startState, RULE_exp);
 						setState(209);
-						if (!(precpred(_ctx, 16))) throw new FailedPredicateException(this, "precpred(_ctx, 16)");
+						if (!(precpred(_ctx, 13))) throw new FailedPredicateException(this, "precpred(_ctx, 13)");
 						setState(210);
 						_la = _input.LA(1);
 						if ( !(_la==PLUS || _la==MINUS) ) {
 						_errHandler.recoverInline(this);
 						}
 						consume();
-						setState(211); exp(17);
+						setState(211); exp(14);
 						}
 						break;
 
@@ -990,14 +990,14 @@ public class javagrammarParser extends Parser {
 						_localctx = new ExpContext(_parentctx, _parentState);
 						pushNewRecursionContext(_localctx, _startState, RULE_exp);
 						setState(212);
-						if (!(precpred(_ctx, 15))) throw new FailedPredicateException(this, "precpred(_ctx, 15)");
+						if (!(precpred(_ctx, 11))) throw new FailedPredicateException(this, "precpred(_ctx, 11)");
 						setState(213);
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LESSTHAN) | (1L << MORETHAN) | (1L << LEQ) | (1L << MEQ))) != 0)) ) {
 						_errHandler.recoverInline(this);
 						}
 						consume();
-						setState(214); exp(16);
+						setState(214); exp(12);
 						}
 						break;
 
@@ -1006,14 +1006,14 @@ public class javagrammarParser extends Parser {
 						_localctx = new ExpContext(_parentctx, _parentState);
 						pushNewRecursionContext(_localctx, _startState, RULE_exp);
 						setState(215);
-						if (!(precpred(_ctx, 14))) throw new FailedPredicateException(this, "precpred(_ctx, 14)");
+						if (!(precpred(_ctx, 10))) throw new FailedPredicateException(this, "precpred(_ctx, 10)");
 						setState(216);
 						_la = _input.LA(1);
 						if ( !(_la==EQ || _la==NEQ) ) {
 						_errHandler.recoverInline(this);
 						}
 						consume();
-						setState(217); exp(15);
+						setState(217); exp(11);
 						}
 						break;
 
@@ -1022,9 +1022,9 @@ public class javagrammarParser extends Parser {
 						_localctx = new ExpContext(_parentctx, _parentState);
 						pushNewRecursionContext(_localctx, _startState, RULE_exp);
 						setState(218);
-						if (!(precpred(_ctx, 13))) throw new FailedPredicateException(this, "precpred(_ctx, 13)");
+						if (!(precpred(_ctx, 9))) throw new FailedPredicateException(this, "precpred(_ctx, 9)");
 						setState(219); match(AND);
-						setState(220); exp(14);
+						setState(220); exp(10);
 						}
 						break;
 
@@ -1033,9 +1033,9 @@ public class javagrammarParser extends Parser {
 						_localctx = new ExpContext(_parentctx, _parentState);
 						pushNewRecursionContext(_localctx, _startState, RULE_exp);
 						setState(221);
-						if (!(precpred(_ctx, 12))) throw new FailedPredicateException(this, "precpred(_ctx, 12)");
+						if (!(precpred(_ctx, 8))) throw new FailedPredicateException(this, "precpred(_ctx, 8)");
 						setState(222); match(OR);
-						setState(223); exp(13);
+						setState(223); exp(9);
 						}
 						break;
 
@@ -1044,7 +1044,7 @@ public class javagrammarParser extends Parser {
 						_localctx = new ExpContext(_parentctx, _parentState);
 						pushNewRecursionContext(_localctx, _startState, RULE_exp);
 						setState(224);
-						if (!(precpred(_ctx, 20))) throw new FailedPredicateException(this, "precpred(_ctx, 20)");
+						if (!(precpred(_ctx, 17))) throw new FailedPredicateException(this, "precpred(_ctx, 17)");
 						setState(225); match(DOT);
 						setState(226); match(LENGTH);
 						}
@@ -1055,7 +1055,7 @@ public class javagrammarParser extends Parser {
 						_localctx = new ExpContext(_parentctx, _parentState);
 						pushNewRecursionContext(_localctx, _startState, RULE_exp);
 						setState(227);
-						if (!(precpred(_ctx, 19))) throw new FailedPredicateException(this, "precpred(_ctx, 19)");
+						if (!(precpred(_ctx, 16))) throw new FailedPredicateException(this, "precpred(_ctx, 16)");
 						setState(228); match(DOT);
 						setState(229); match(ID);
 						setState(230); match(LEFTPAREN);
@@ -1069,7 +1069,7 @@ public class javagrammarParser extends Parser {
 						_localctx = new ExpContext(_parentctx, _parentState);
 						pushNewRecursionContext(_localctx, _startState, RULE_exp);
 						setState(234);
-						if (!(precpred(_ctx, 18))) throw new FailedPredicateException(this, "precpred(_ctx, 18)");
+						if (!(precpred(_ctx, 15))) throw new FailedPredicateException(this, "precpred(_ctx, 15)");
 						setState(235); match(LEFTBRACKET);
 						setState(236); exp(0);
 						setState(237); match(RIGHTBRACKET);
@@ -1208,23 +1208,23 @@ public class javagrammarParser extends Parser {
 	}
 	private boolean exp_sempred(ExpContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 0: return precpred(_ctx, 17);
+		case 0: return precpred(_ctx, 14);
 
-		case 1: return precpred(_ctx, 16);
+		case 1: return precpred(_ctx, 13);
 
-		case 2: return precpred(_ctx, 15);
+		case 2: return precpred(_ctx, 11);
 
-		case 3: return precpred(_ctx, 14);
+		case 3: return precpred(_ctx, 10);
 
-		case 4: return precpred(_ctx, 13);
+		case 4: return precpred(_ctx, 9);
 
-		case 5: return precpred(_ctx, 12);
+		case 5: return precpred(_ctx, 8);
 
-		case 6: return precpred(_ctx, 20);
+		case 6: return precpred(_ctx, 17);
 
-		case 7: return precpred(_ctx, 19);
+		case 7: return precpred(_ctx, 16);
 
-		case 8: return precpred(_ctx, 18);
+		case 8: return precpred(_ctx, 15);
 		}
 		return true;
 	}
@@ -1287,27 +1287,27 @@ public class javagrammarParser extends Parser {
 		"\7%\2\2\u00ac\u00ad\5\24\13\2\u00ad\u00ae\7!\2\2\u00ae\u00b0\3\2\2\2\u00af"+
 		"\u0085\3\2\2\2\u00af\u008d\3\2\2\2\u00af\u0096\3\2\2\2\u00af\u009c\3\2"+
 		"\2\2\u00af\u00a2\3\2\2\2\u00af\u00a7\3\2\2\2\u00b0\23\3\2\2\2\u00b1\u00b2"+
-		"\b\13\1\2\u00b2\u00b3\7&\2\2\u00b3\u00cf\5\24\13\4\u00b4\u00cf\7\61\2"+
-		"\2\u00b5\u00cf\7\62\2\2\u00b6\u00cf\7/\2\2\u00b7\u00cf\7\60\2\2\u00b8"+
-		"\u00cf\7\63\2\2\u00b9\u00cf\7\21\2\2\u00ba\u00bb\7\17\2\2\u00bb\u00bc"+
-		"\7\25\2\2\u00bc\u00bd\7\30\2\2\u00bd\u00be\5\24\13\2\u00be\u00bf\7\31"+
-		"\2\2\u00bf\u00cf\3\2\2\2\u00c0\u00c1\7\17\2\2\u00c1\u00c2\7\27\2\2\u00c2"+
-		"\u00c3\7\30\2\2\u00c3\u00c4\5\24\13\2\u00c4\u00c5\7\31\2\2\u00c5\u00cf"+
-		"\3\2\2\2\u00c6\u00c7\7\17\2\2\u00c7\u00c8\7\63\2\2\u00c8\u00c9\7\32\2"+
-		"\2\u00c9\u00cf\7\33\2\2\u00ca\u00cb\7\32\2\2\u00cb\u00cc\5\24\13\2\u00cc"+
+		"\b\13\1\2\u00b2\u00b3\7&\2\2\u00b3\u00cf\5\24\13\16\u00b4\u00b5\7\17\2"+
+		"\2\u00b5\u00b6\7\25\2\2\u00b6\u00b7\7\30\2\2\u00b7\u00b8\5\24\13\2\u00b8"+
+		"\u00b9\7\31\2\2\u00b9\u00cf\3\2\2\2\u00ba\u00bb\7\17\2\2\u00bb\u00bc\7"+
+		"\27\2\2\u00bc\u00bd\7\30\2\2\u00bd\u00be\5\24\13\2\u00be\u00bf\7\31\2"+
+		"\2\u00bf\u00cf\3\2\2\2\u00c0\u00c1\7\17\2\2\u00c1\u00c2\7\63\2\2\u00c2"+
+		"\u00c3\7\32\2\2\u00c3\u00cf\7\33\2\2\u00c4\u00cf\7\61\2\2\u00c5\u00cf"+
+		"\7\62\2\2\u00c6\u00cf\7/\2\2\u00c7\u00cf\7\60\2\2\u00c8\u00cf\7\63\2\2"+
+		"\u00c9\u00cf\7\21\2\2\u00ca\u00cb\7\32\2\2\u00cb\u00cc\5\24\13\2\u00cc"+
 		"\u00cd\7\33\2\2\u00cd\u00cf\3\2\2\2\u00ce\u00b1\3\2\2\2\u00ce\u00b4\3"+
-		"\2\2\2\u00ce\u00b5\3\2\2\2\u00ce\u00b6\3\2\2\2\u00ce\u00b7\3\2\2\2\u00ce"+
-		"\u00b8\3\2\2\2\u00ce\u00b9\3\2\2\2\u00ce\u00ba\3\2\2\2\u00ce\u00c0\3\2"+
-		"\2\2\u00ce\u00c6\3\2\2\2\u00ce\u00ca\3\2\2\2\u00cf\u00f3\3\2\2\2\u00d0"+
-		"\u00d1\f\23\2\2\u00d1\u00d2\7$\2\2\u00d2\u00f2\5\24\13\24\u00d3\u00d4"+
-		"\f\22\2\2\u00d4\u00d5\t\2\2\2\u00d5\u00f2\5\24\13\23\u00d6\u00d7\f\21"+
-		"\2\2\u00d7\u00d8\t\3\2\2\u00d8\u00f2\5\24\13\22\u00d9\u00da\f\20\2\2\u00da"+
-		"\u00db\t\4\2\2\u00db\u00f2\5\24\13\21\u00dc\u00dd\f\17\2\2\u00dd\u00de"+
-		"\7\'\2\2\u00de\u00f2\5\24\13\20\u00df\u00e0\f\16\2\2\u00e0\u00e1\7(\2"+
-		"\2\u00e1\u00f2\5\24\13\17\u00e2\u00e3\f\26\2\2\u00e3\u00e4\7\36\2\2\u00e4"+
-		"\u00f2\7\23\2\2\u00e5\u00e6\f\25\2\2\u00e6\u00e7\7\36\2\2\u00e7\u00e8"+
+		"\2\2\2\u00ce\u00ba\3\2\2\2\u00ce\u00c0\3\2\2\2\u00ce\u00c4\3\2\2\2\u00ce"+
+		"\u00c5\3\2\2\2\u00ce\u00c6\3\2\2\2\u00ce\u00c7\3\2\2\2\u00ce\u00c8\3\2"+
+		"\2\2\u00ce\u00c9\3\2\2\2\u00ce\u00ca\3\2\2\2\u00cf\u00f3\3\2\2\2\u00d0"+
+		"\u00d1\f\20\2\2\u00d1\u00d2\7$\2\2\u00d2\u00f2\5\24\13\21\u00d3\u00d4"+
+		"\f\17\2\2\u00d4\u00d5\t\2\2\2\u00d5\u00f2\5\24\13\20\u00d6\u00d7\f\r\2"+
+		"\2\u00d7\u00d8\t\3\2\2\u00d8\u00f2\5\24\13\16\u00d9\u00da\f\f\2\2\u00da"+
+		"\u00db\t\4\2\2\u00db\u00f2\5\24\13\r\u00dc\u00dd\f\13\2\2\u00dd\u00de"+
+		"\7\'\2\2\u00de\u00f2\5\24\13\f\u00df\u00e0\f\n\2\2\u00e0\u00e1\7(\2\2"+
+		"\u00e1\u00f2\5\24\13\13\u00e2\u00e3\f\23\2\2\u00e3\u00e4\7\36\2\2\u00e4"+
+		"\u00f2\7\23\2\2\u00e5\u00e6\f\22\2\2\u00e6\u00e7\7\36\2\2\u00e7\u00e8"+
 		"\7\63\2\2\u00e8\u00e9\7\32\2\2\u00e9\u00ea\5\26\f\2\u00ea\u00eb\7\33\2"+
-		"\2\u00eb\u00f2\3\2\2\2\u00ec\u00ed\f\24\2\2\u00ed\u00ee\7\30\2\2\u00ee"+
+		"\2\u00eb\u00f2\3\2\2\2\u00ec\u00ed\f\21\2\2\u00ed\u00ee\7\30\2\2\u00ee"+
 		"\u00ef\5\24\13\2\u00ef\u00f0\7\31\2\2\u00f0\u00f2\3\2\2\2\u00f1\u00d0"+
 		"\3\2\2\2\u00f1\u00d3\3\2\2\2\u00f1\u00d6\3\2\2\2\u00f1\u00d9\3\2\2\2\u00f1"+
 		"\u00dc\3\2\2\2\u00f1\u00df\3\2\2\2\u00f1\u00e2\3\2\2\2\u00f1\u00e5\3\2"+
