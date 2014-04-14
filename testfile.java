@@ -9,6 +9,7 @@ class bla {
     boolean b;
     long l;
     long[] la;
+    kek k;
     l = 23l;
     x = 3;
     y = new int[5];
@@ -21,7 +22,9 @@ class bla {
     la[2] = x;
     b = true && false;
     b = b || true;
-
+    k = new kek();
+    x = k.lol(10);
+    b = k.truer();
   }
 }
 
@@ -40,11 +43,15 @@ class kek {
         return true;
     }
 
-    public boolean kek() {
+    public boolean kek(int pop) {
         kek a;
         boolean b;
         a = new kek();
         b = a.truer();
+        x = 3;
+        pop = 4;
+        x = pop;
+        pop = x;
         return (true && this.truer());
     }
 }

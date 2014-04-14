@@ -294,6 +294,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
         else if(methodVariables.containsKey(id.getText())) {
             return methodVariables.get(id.getText());
         }
+        System.err.println(id.getParent().getText());
         System.err.println("Cannot find id : " + id.getText() + " at line " + id.getSymbol().getLine());
         System.exit(1);
         return null;
