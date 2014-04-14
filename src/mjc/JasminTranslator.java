@@ -46,7 +46,6 @@ public class JasminTranslator extends javagrammarBaseListener {
     }
 
     @Override public void enterStmt(javagrammarParser.StmtContext ctx) {
-        System.out.println(ctx.getText());
         filePrinter.append(String.format("iconst_3\n"));
         filePrinter.append(String.format("istore_1\n"));
     }

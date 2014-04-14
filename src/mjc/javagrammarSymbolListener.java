@@ -134,7 +134,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
 
     @Override public void exitMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
         if(!ctx.type().getText().equals(getTypeFromExp(ctx.exp()))) {
-            System.err.println("You have to return an item of the same type as the method");
+            System.err.printf("You have to return an item of the same type as the method, %s\n", ctx.getText());
             System.exit(1);
         }
         methodVariables.clear();
@@ -151,7 +151,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
      * Go through an ```Exp´´´ and find what type it results in in the end.
      * Return the type.
      */
-    private String getTypeFromExp(javagrammarParser.ExpContext exp) {;
+    private String getTypeFromExp(javagrammarParser.ExpContext exp) {
         /*
          * Every expression that makes it immediately obvious what type it is.
          */
@@ -167,6 +167,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             } else {
                 return currClass.ID().getText();
             }
+
         } else if(exp.NEW() != null) {
             if(exp.INT() != null && getTypeFromExp(exp.exp(0)).equals("int")) {
                 return "int[]";
@@ -245,7 +246,15 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
         }
         //There should now ONLY be exp.id left.
         //Else something has gone wrong
-        else if(exp.ID() != null) {
+        if(exp.DOT() != null) {
+            String expType = exp.exp(0).getText();
+            if(expType.equals("this")) {
+                return getTypeFromMethodId(exp.ID().getText(), currClass.ID().getText());
+            } else {
+                return getTypeFromMethodId(exp.ID().getText(), getTypeFromId(exp.exp(0).ID()));
+            }
+
+        } else if(exp.ID() != null) {
             //This will be a class name if the writer of the program did it right
             String type = getTypeFromExp(exp.exp(0));
             //Mainclass can't hold any methods so we'll just check other classes
@@ -313,5 +322,19 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             return;
         }
         methodVariables.put(id.getText(), type);
+    }
+
+    public String getTypeFromMethodId(String id, String classid) {
+        javagrammarParser.ClassdeclContext c = classes.get(classid);
+        if(c!=null) {
+            for(javagrammarParser.MethoddeclContext meth : c.methoddecl()) {
+                if(meth.ID().getText().equals(id)) {
+                    return meth.type().getText();
+                }
+            }
+        }
+        System.err.printf("Can not find %s in class %s\n", id, classid);
+        System.exit(1);
+        return null;
     }
 }
