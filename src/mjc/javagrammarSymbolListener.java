@@ -212,7 +212,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
                 System.err.println("Both expression must be either long or int.");
                 System.exit(1);
             }
-        } else if((exp.MEQ() != null) || (exp.EQ() != null) || (exp.LEQ() != null) || (exp.LESSTHAN() != null)
+        } else if((exp.MEQ() != null) || (exp.NEQ() != null) || (exp.EQ() != null) || (exp.LEQ() != null) || (exp.LESSTHAN() != null)
                 || (exp.MORETHAN() != null)) {
             String exptype = getTypeFromExp(exp.exp(0));
             String exptype2 = getTypeFromExp(exp.exp(1));
