@@ -9,9 +9,14 @@ class bla {
     boolean b;
     long l;
     long[] la;
+    int newpop;
+    newpop p;
     kek k;
+    bla ble;
     l = 23l;
     x = 3;
+    p = new newpop();
+    x = p.s(10);
     y = new int[5];
     la = new long[5];
     y[3] = 5;
@@ -23,8 +28,11 @@ class bla {
     b = true && false;
     b = b || true;
     k = new kek();
+    ble = new bla();
     x = k.lol(10);
     b = k.truer();
+    x = k.newrofl();
+    newpop = 3;
   }
 }
 
@@ -39,10 +47,16 @@ class kek {
 
     }
 
+
+
     public boolean truer() {
+        int i;
+        i = this.newrofl();
         return true;
     }
-
+    public int newrofl(){
+        return 1;
+    }
     public boolean kek(int pop) {
         kek a;
         boolean b;
@@ -53,5 +67,14 @@ class kek {
         x = pop;
         pop = x;
         return (true && this.truer());
+    }
+}
+
+class newpop  {
+    public int newpop() {
+        return 1;
+    }
+    public int s(int newpop) {
+        return this.newpop();
     }
 }

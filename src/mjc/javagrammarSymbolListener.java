@@ -52,7 +52,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             System.exit(1);
         } else {
             if(ctx.type().ID() != null) {
-                if(!classes.containsKey(ctx.type().ID().getText())) {
+                if(!classes.containsKey(ctx.type().ID().getText()) && !mainclass.ID(0).getText().equals(ctx.type().ID().getText())) {
                     System.err.println("No such class exists : " + ctx.type().ID().getText());
                     System.exit(1);
                 }
@@ -141,7 +141,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
     }
 
     @Override public void enterType(@NotNull javagrammarParser.TypeContext ctx) {
-        if(ctx.ID() != null && !classes.containsKey(ctx.ID().getText())) {
+        if(ctx.ID() != null && !classes.containsKey(ctx.ID().getText()) && !mainclass.ID(0).getText().equals(ctx.ID().getText())) {
             System.err.println("Class " + ctx.ID().getText() + " does not exist");
             System.exit(1);
         }
@@ -175,6 +175,8 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
                 return "long[]";
             } else if(classes.containsKey(exp.ID().getText())) {
                 return exp.ID().getText();
+            } else if(mainclass.ID(0).getText().equals(exp.ID().getText())) {
+                return mainclass.ID(0).getText();
             } else {
                 System.err.println("Cannot create instance of " + exp.ID().getText());
                 System.exit(1);
@@ -294,8 +296,11 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
         else if(methodVariables.containsKey(id.getText())) {
             return methodVariables.get(id.getText());
         }
-        System.err.println(id.getParent().getText());
+
+
         System.err.println("Cannot find id : " + id.getText() + " at line " + id.getSymbol().getLine());
+        System.err.println("Called " + id.getParent().getText());
+        System.err.println("in " + id.getParent().getParent().getText());
         System.exit(1);
         return null;
     }
