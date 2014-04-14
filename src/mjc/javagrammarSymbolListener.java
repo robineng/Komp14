@@ -209,9 +209,12 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
         else if((exp.MULT() != null) || (exp.MINUS() != null) || (exp.PLUS() != null)) {
             //Could be either long or int
             String numtype = getTypeFromExp(exp.exp(0));
-            if(numtype.matches("int|long") && numtype.equals(getTypeFromExp(exp.exp(1)))) {
+            if(numtype.matches("long") && getTypeFromExp(exp.exp(1)).matches("int|long")) {
                 return numtype;
-            } else {
+            } else if (numtype.matches("int") && getTypeFromExp(exp.exp(1)).matches("int")){
+                return numtype;
+            }
+            else {
                 System.err.println("Both expression must be either long or int.");
                 System.exit(1);
             }
