@@ -1,5 +1,9 @@
 grammar javagrammar;
 
+@header {
+    package mjc;
+}
+
 options
 {
   language = Java;
@@ -8,6 +12,9 @@ options
 //LEXER RULES!
 //Skip whitespace
 WS : [ \t\r\n]+ -> skip;
+COMMENT1 : '//'.*?[\n] -> skip;
+COMMENT2 : '/*'.*?'*/' -> skip;
+COMMENT3 : '/**'.*?'**/' -> skip;
 //Reserved words
 CLASS : 'class';
 PUBLIC : 'public';
@@ -58,11 +65,11 @@ TRUE : 'true';
 FALSE : 'false';
 INT_LIT : '0' | ('1'..'9')('0'..'9')*;
 LONG_LIT : '0'('l'|'L') | ('1'..'9')('0'..'9')*('l'|'L');
-ID : ('a'..'z'|'A'..'Z')('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
+ID : ('a'..'z'|'A'..'Z'|'_')('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
 
 //Parser rules!
 program : mainclass (classdecl)*;
-mainclass : CLASS ID LEFTBRACE PUBLIC STATIC VOID 'main' LEFTPAREN STRING 
+mainclass : CLASS ID LEFTBRACE PUBLIC STATIC VOID {_input.LT(1).getText().matches("main")}? ID LEFTPAREN STRING
             LEFTBRACKET RIGHTBRACKET ID RIGHTPAREN LEFTBRACE (vardecl)* (stmt)* RIGHTBRACE RIGHTBRACE;
 
 classdecl : CLASS ID LEFTBRACE (vardecl)* (methoddecl)* RIGHTBRACE;
@@ -90,25 +97,27 @@ stmt : LEFTBRACE (stmt)* RIGHTBRACE |
        ID ASSIGNMENT exp SEMICOLON|
        ID LEFTBRACKET exp RIGHTBRACKET ASSIGNMENT exp SEMICOLON;
 
-exp : exp MULT exp|
+exp : NEW INT LEFTBRACKET exp RIGHTBRACKET|
+      NEW LONG LEFTBRACKET exp RIGHTBRACKET|
+      NEW ID LEFTPAREN RIGHTPAREN|
+      exp DOT LENGTH|
+      exp DOT ID LEFTPAREN explist RIGHTPAREN|
+      exp LEFTBRACKET exp RIGHTBRACKET|
+      LEFTPAREN exp RIGHTPAREN|
+      exp MULT exp|
       exp (MINUS|PLUS) exp|
+      NOT exp|
       exp (MEQ|LEQ|MORETHAN|LESSTHAN) exp|
       exp (EQ|NEQ) exp|
       exp AND exp|
       exp OR exp|
-      exp LEFTBRACKET exp RIGHTBRACKET|
-      exp DOT LENGTH|
-      exp DOT ID LEFTPAREN explist RIGHTPAREN|
       INT_LIT|
       LONG_LIT|
       TRUE|
       FALSE|
       ID|
-      THIS|
-      NEW INT LEFTBRACKET exp RIGHTBRACKET|
-      NEW ID LEFTPAREN RIGHTPAREN|
-      NOT exp|
-      LEFTPAREN exp RIGHTPAREN;
+      THIS;
+
 
 //op : MULT|
 //     MINUS|

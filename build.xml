@@ -34,7 +34,7 @@
   <target name="jar" depends="compile">
       <manifest file="MANIFEST.MF">
         <attribute name="Main-Class" 
-                   value="JVMMain" />
+                   value="mjc.JVMMain" />
       </manifest>
       <jar destfile="mjc.jar"
            manifest="MANIFEST.MF">

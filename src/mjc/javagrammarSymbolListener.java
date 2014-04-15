@@ -13,7 +13,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
     private HashMap <String, String> classVariables;
     private  HashMap<String, String> methodVariables;
     private javagrammarParser.MainclassContext mainclass;
-    private final HashMap<String, javagrammarParser.ClassdeclContext> classes;
+    private HashMap<String, javagrammarParser.ClassdeclContext> classes;
     private javagrammarParser.ClassdeclContext currClass = null;
 
     public javagrammarSymbolListener(){
@@ -52,7 +52,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             System.exit(1);
         } else {
             if(ctx.type().ID() != null) {
-                if(!classes.containsKey(ctx.type().ID().getText())) {
+                if(!classes.containsKey(ctx.type().ID().getText()) && !mainclass.ID(0).getText().equals(ctx.type().ID().getText())) {
                     System.err.println("No such class exists : " + ctx.type().ID().getText());
                     System.exit(1);
                 }
@@ -69,17 +69,31 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
            }
         }
         if(ctx.ASSIGNMENT() != null) {
-            if(!getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(0)))) {
-                System.err.println("Cannot assign to different types");
-                System.exit(1);
+            //If assigment to index of array
+            if(ctx.exp().size() == 2){
+                if(ctx.exp(0).INT_LIT() == null && !getTypeFromExp(ctx.exp(0)).equals("int")){
+                    System.err.println("Invalid index of array at line " + ctx.ID().getSymbol().getLine());
+                    System.exit(1);
+                }
+                String arrayType = getTypeFromArrayId(ctx.ID());
+                if(!arrayType.equals(getTypeFromExp(ctx.exp(1)))){
+                    if(!(arrayType.equals("long") && getTypeFromExp(ctx.exp(0)).equals("int"))){
+                        System.err.println("Cannot assign " + getTypeFromExp(ctx.exp(1)) + " to " + arrayType +
+                              " array on line " + ctx.ID().getSymbol().getLine());
+                        System.exit(1);
+                    }
+                }
+            }
+
+            else if(!getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(0)))) {
+                if(!(getTypeFromId(ctx.ID()).equals("long") && getTypeFromExp(ctx.exp(0)).equals("int"))){
+                    System.err.println("Cannot assign " + getTypeFromExp(ctx.exp(0)) + " to " + getTypeFromId(ctx.ID()) +
+                            " variable on line " + ctx.ID().getSymbol().getLine());
+                    System.exit(1);
+                }
             }
         }
-        if(ctx.LEFTBRACKET() != null) {
-            if(!ctx.exp(0).equals("int") || !getTypeFromId(ctx.ID()).equals(getTypeFromExp(ctx.exp(1)))) {
-                System.err.println("Bracket assignment wrong!");
-                System.exit(1);
-            }
-        }
+
     }
 
 
@@ -95,7 +109,6 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
 
     @Override public void enterMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
         methodVariables.clear();
-
     }
 
     @Override public void enterFormallist(@NotNull javagrammarParser.FormallistContext ctx) {
@@ -103,32 +116,32 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             if(!idAlreadyInCurrentContext(ctx.ID())) {
                 methodVariables.put(ctx.ID().getText(), ctx.type().getText());
             } else {
-                System.err.println("Cannot redefine variable");
+                System.err.println("Cannot redefine variable at line " + ctx.ID().getSymbol().getLine());
                 System.exit(1);
             }
-            if(ctx.formalrest() != null) {
-                for(javagrammarParser.FormalrestContext rest : ctx.formalrest()) {
-                    if(!idAlreadyInCurrentContext(rest.ID())) {
-                        addNewIdToContext(ctx.ID(), ctx.type().getText(), ctx.parent);
-                    } else {
-                        System.err.println("Cannot redefine a variable");
-                        System.exit(1);
-                    }
-                }
+        }
+    }
+    @Override public void enterFormalrest(@NotNull javagrammarParser.FormalrestContext ctx){
+        if(ctx.type() != null) {
+            if(!idAlreadyInCurrentContext(ctx.ID())) {
+                methodVariables.put(ctx.ID().getText(), ctx.type().getText());
+            } else {
+                System.err.println("Cannot redefine variable at line " + ctx.ID().getSymbol().getLine());
+                System.exit(1);
             }
         }
     }
 
     @Override public void exitMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
         if(!ctx.type().getText().equals(getTypeFromExp(ctx.exp()))) {
-            System.err.println("You have to return an item of the same type as the method");
+            System.err.printf("You have to return an item of the same type as the method, %s\n", ctx.getText());
             System.exit(1);
         }
         methodVariables.clear();
     }
 
     @Override public void enterType(@NotNull javagrammarParser.TypeContext ctx) {
-        if(ctx.ID() != null && !classes.containsKey(ctx.ID().getText())) {
+        if(ctx.ID() != null && !classes.containsKey(ctx.ID().getText()) && !mainclass.ID(0).getText().equals(ctx.ID().getText())) {
             System.err.println("Class " + ctx.ID().getText() + " does not exist");
             System.exit(1);
         }
@@ -154,17 +167,22 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             } else {
                 return currClass.ID().getText();
             }
+
         } else if(exp.NEW() != null) {
             if(exp.INT() != null && getTypeFromExp(exp.exp(0)).equals("int")) {
                 return "int[]";
-            } else if(classes.containsKey(exp.ID())) {
+            } else if(exp.LONG() != null) {
+                return "long[]";
+            } else if(classes.containsKey(exp.ID().getText())) {
                 return exp.ID().getText();
+            } else if(mainclass.ID(0).getText().equals(exp.ID().getText())) {
+                return mainclass.ID(0).getText();
             } else {
                 System.err.println("Cannot create instance of " + exp.ID().getText());
                 System.exit(1);
             }
         } else if(exp.NOT() != null) {
-            if(getTypeFromId(exp.exp(0).ID()).equals("boolean")) {
+            if(getTypeFromExp(exp.exp(0)).equals("boolean")) {
                 return "boolean";
             } else {
                 System.err.println("Cannot negate a non boolean value");
@@ -183,7 +201,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
                 return "boolean";
             }
             else {
-                System.err.println("Both sides of AND or OR must be boolean");
+                System.err.printf("Both sides of AND or OR must be boolean, %s\n",exp.getText());
                 System.exit(1);
             }
         }
@@ -191,17 +209,25 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
         else if((exp.MULT() != null) || (exp.MINUS() != null) || (exp.PLUS() != null)) {
             //Could be either long or int
             String numtype = getTypeFromExp(exp.exp(0));
-            if(numtype.matches("int|long") && numtype.equals(getTypeFromExp(exp.exp(1)))) {
+            if(numtype.matches("long") && getTypeFromExp(exp.exp(1)).matches("int|long")) {
                 return numtype;
-            } else {
-                System.err.println("Both expression must be either long or int.");
+            } else if (numtype.matches("int") && getTypeFromExp(exp.exp(1)).matches("int")){
+                return numtype;
+            }
+            else {
+                System.err.printf("Both expressions must be either long or int. Exp 1: %s, Exp 2: %s, Whole exp: %s\n",
+                        getTypeFromExp(exp.exp(0)), getTypeFromExp(exp.exp(1)), exp.getText());
+                System.err.printf("in %s\n",exp.parent.getText());
                 System.exit(1);
             }
-        } else if((exp.MEQ() != null) || (exp.EQ() != null) || (exp.LEQ() != null) || exp.LESSTHAN()!=null
-                || exp.MORETHAN() != null) {
+        } else if((exp.MEQ() != null) || (exp.NEQ() != null) || (exp.EQ() != null) || (exp.LEQ() != null) || (exp.LESSTHAN() != null)
+                || (exp.MORETHAN() != null)) {
             String exptype = getTypeFromExp(exp.exp(0));
+            String exptype2 = getTypeFromExp(exp.exp(1));
             if(exptype.matches("int|long|boolean|int\\[\\]|long\\[\\]")) {
-                if(exptype.equals(getTypeFromExp(exp.exp(1)))) {
+                if(exptype.equals(exptype2)) {
+                    return "boolean";
+                }else if((exptype.equals("int") || exptype.equals("long")) && (exptype2.equals("int") || exptype2.equals("long"))){
                     return "boolean";
                 }
             }
@@ -210,7 +236,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             else if (!getTypeFromExp(exp.exp(1)).matches("int|long|boolean|int\\[\\]|long\\[\\]")) {
                return "boolean";
             }
-            System.err.println("Cannot compare these types");
+            System.err.println("Cannot compare " + exptype + " with " + getTypeFromExp(exp.exp(1)));
             System.exit(1);
         } else if(exp.LENGTH() != null) {
             if(getTypeFromExp(exp.exp(0)).matches("int\\[]|long\\[]")) {
@@ -218,10 +244,24 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             }
             System.err.println("Can not get the length of this object");
             System.exit(1);
+        } else if(exp.exp().size() == 2 && exp.LEFTBRACKET() != null){
+            if(getTypeFromExp(exp.exp(1)).equals("int")){
+                return getArrayTypeFromExp(exp.exp(0));
+            }
+            System.err.println("Invalid index of array at line: " + exp.LEFTBRACKET().getSymbol().getLine());
+            System.exit(1);
         }
         //There should now ONLY be exp.id left.
         //Else something has gone wrong
-        else if(exp.ID() != null) {
+        if(exp.DOT() != null) {
+            String expType = exp.exp(0).getText();
+            if(expType.equals("this")) {
+                return getTypeFromMethodId(exp.ID().getText(), currClass.ID().getText());
+            } else {
+                return getTypeFromMethodId(exp.ID().getText(), getTypeFromExp(exp.exp(0)));
+            }
+
+        } else if(exp.ID() != null) {
             //This will be a class name if the writer of the program did it right
             String type = getTypeFromExp(exp.exp(0));
             //Mainclass can't hold any methods so we'll just check other classes
@@ -255,19 +295,35 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
      * If no matching id can be found, exit the compiler.
      */
     private String getTypeFromId(TerminalNode id) {
-        if(classVariables.containsKey(id.getText())) {
+        if(methodVariables.containsKey(id.getText())) {
+            return methodVariables.get(id.getText());
+        }else if(classVariables.containsKey(id.getText())) {
             return classVariables.get(id.getText());
         }
-        else if(methodVariables.containsKey(id.getText())) {
-            return methodVariables.get(id.getText());
-        }
-        System.err.println("Cannot find id : " + id.getText());
+
+
+        System.err.println("Cannot find id : " + id.getText() + " at line " + id.getSymbol().getLine());
+        System.err.println("Called " + id.getParent().getText());
+        System.err.println("in " + id.getParent().getParent().getText());
         System.exit(1);
         return null;
     }
 
+    /**
+     * Gets the type of the objects an array i storing
+     * @param id the id of the array
+     * @return String representing the type
+     */
+    private String getTypeFromArrayId(TerminalNode id){
+        return getTypeFromId(id).split("\\[")[0];
+    }
+
+    private String getArrayTypeFromExp(javagrammarParser.ExpContext exp){
+        return getTypeFromExp(exp).split("\\[")[0];
+    }
+
     private boolean idAlreadyInCurrentContext(TerminalNode id) {
-        return classVariables.containsKey(id.getText()) || methodVariables.containsKey(id.getText());
+        return methodVariables.containsKey(id.getText());
     }
 
     private void addNewIdToContext(TerminalNode id, String type, RuleContext rc) {
@@ -276,5 +332,19 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
             return;
         }
         methodVariables.put(id.getText(), type);
+    }
+
+    public String getTypeFromMethodId(String id, String classid) {
+        javagrammarParser.ClassdeclContext c = classes.get(classid);
+        if(c!=null) {
+            for(javagrammarParser.MethoddeclContext meth : c.methoddecl()) {
+                if(meth.ID().getText().equals(id)) {
+                    return meth.type().getText();
+                }
+            }
+        }
+        System.err.printf("Can not find %s in class %s\n", id, classid);
+        System.exit(1);
+        return null;
     }
 }

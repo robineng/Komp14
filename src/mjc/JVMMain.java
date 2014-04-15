@@ -23,8 +23,9 @@ public class JVMMain {
             ParseTreeWalker walker = new ParseTreeWalker();
             javagrammarSymbolListener listener = new javagrammarSymbolListener();
             walker.walk(listener, context);
-            File f = new File(args[0].substring(0, args[0].indexOf(".")) + ".j");
-            f.createNewFile();
+
+            JasminTranslator translator = new JasminTranslator();
+            walker.walk(translator, context);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
