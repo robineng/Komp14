@@ -4,9 +4,9 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Created by suicidal on 3/18/14.
@@ -21,11 +21,21 @@ public class JVMMain {
             javagrammarParser.ProgramContext context = parser.program();
 
             ParseTreeWalker walker = new ParseTreeWalker();
-            javagrammarSymbolListener listener = new javagrammarSymbolListener();
-            walker.walk(listener, context);
 
-            JasminTranslator translator = new JasminTranslator();
-            walker.walk(translator, context);
+            SymbolRecorder rec = new SymbolRecorder();
+            walker.walk(rec, context);
+
+            HashMap<String, ClassSymbol> classes = rec.getClasses();
+
+            StatementValidator valid = new StatementValidator(classes);
+            walker.walk(valid, context);
+
+
+            //javagrammarSymbolListener listener = new javagrammarSymbolListener();
+            //walker.walk(listener, context);
+
+            //JasminTranslator translator = new JasminTranslator();
+            //walker.walk(translator, context);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);

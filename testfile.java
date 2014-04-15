@@ -4,7 +4,7 @@
 
 class bla {
   public static void main(String[] args) {
-    int x;
+    int g;
     boolean b;
     int[] z;
     kek k;
@@ -16,14 +16,18 @@ class bla {
 }
 
 class main {
-
+    int g;
 }
+
+
 
 class kek {
     int x;
     int y;
+    int g;
 
     public int lol(int i){
+        int x;
         int k;
         k = i;
         return k;
