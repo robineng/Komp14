@@ -87,7 +87,7 @@ public class StatementValidator extends javagrammarBaseListener{
 
 
     public String getTypeFromExp(javagrammarParser.ExpContext exp){
-        System.out.println("exp: " + exp.getText());
+        //System.out.println("exp: " + exp.getText());
         if(exp.INT_LIT() != null){
             return "int";
         }
@@ -248,7 +248,7 @@ public class StatementValidator extends javagrammarBaseListener{
     }
 
     public String getTypeFromId(TerminalNode id){
-        System.out.println(id.getText());
+        //System.out.println(id.getText());
         if(currMethod.varExists(id.getText())){
             return currMethod.getVar(id.getText()).getType();
         }else if(currClass.varExists(id.getText())){
