@@ -133,10 +133,12 @@ public class StatementValidator extends javagrammarBaseListener{
             ClassSymbol cs = classes.get(cl);
             if(!cs.methodExists(exp.ID().getText())){
                 System.err.println("Method " + exp.ID().getText() + " not found on line: " + exp.DOT().getSymbol().getLine());
+                System.exit(1);
             }
             MethodSymbol meth = cs.getMethod(exp.ID().getText());
             if(!checkMethodParams(meth, exp.explist())){
                 System.err.println("Parameter failure on line: " + exp.DOT().getSymbol().getLine());
+                System.exit(1);
             }
             return meth.getType();
 
@@ -233,7 +235,7 @@ public class StatementValidator extends javagrammarBaseListener{
                 return false;
             }
             for(int i = 0; i<nrOfExp; i++){
-                if(typeList.get(i) != params.get(i).getType()){
+                if(!typeList.get(i).equals(params.get(i).getType())){
                     return false;
                 }
             }
@@ -253,6 +255,8 @@ public class StatementValidator extends javagrammarBaseListener{
             return currMethod.getVar(id.getText()).getType();
         }else if(currClass.varExists(id.getText())){
             return currClass.getVar(id.getText()).getType();
+        } else if(classes.containsKey(id.getText())){
+            return id.getText();
         }
         System.err.println("Can not find variable: " + id.getText() + " on line: " + id.getSymbol().getLine());
         System.exit(1);

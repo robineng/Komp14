@@ -64,4 +64,7 @@ class newpop  {
     public int s(int newpop) {
         return this.newpop();
     }
+    public int kekpop(){
+        return this.s(this.newpop());
+    }
 }
