@@ -2,6 +2,8 @@ package mjc;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.TerminalNode;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -85,6 +87,7 @@ public class StatementValidator extends javagrammarBaseListener{
 
 
     public String getTypeFromExp(javagrammarParser.ExpContext exp){
+        System.out.println("exp: " + exp.getText());
         if(exp.INT_LIT() != null){
             return "int";
         }
@@ -105,7 +108,12 @@ public class StatementValidator extends javagrammarBaseListener{
                 return "long[]";
             }
             if(exp.ID() != null){
-                return getTypeFromId(exp.ID());
+                if(!classes.containsKey(exp.ID().getText())){
+                    System.err.println("Class " + exp.ID().getText() + " not found on line: " + exp.ID().getSymbol().getLine());
+                    System.exit(1);
+                }else{
+                    return exp.ID().getText();
+                }
             }
         }
         if(exp.LENGTH() != null){
@@ -127,16 +135,122 @@ public class StatementValidator extends javagrammarBaseListener{
                 System.err.println("Method " + exp.ID().getText() + " not found on line: " + exp.DOT().getSymbol().getLine());
             }
             MethodSymbol meth = cs.getMethod(exp.ID().getText());
+            if(!checkMethodParams(meth, exp.explist())){
+                System.err.println("Parameter failure on line: " + exp.DOT().getSymbol().getLine());
+            }
+            return meth.getType();
+
+
 
         }
-        return null;
+        if(exp.LEFTBRACKET() != null){
+            if(!getTypeFromExp(exp.exp(1)).equals("int")){
+                System.err.println("Index need to be integer on line: " + exp.LEFTBRACKET().getSymbol().getLine());
+                System.exit(1);
+            }
+            String type = getTypeFromExp(exp.exp(0));
+            if(!type.matches("int\\[\\]|long\\[\\]")){
+                System.err.println("Must be int or long array on line: " + exp.LEFTBRACKET().getSymbol().getLine());
+                System.exit(1);
+            }
+            return type;
+        }
+
+        if(exp.AND() != null || exp.OR() != null){
+            if(!getTypeFromExp(exp.exp(0)).equals("boolean") || !getTypeFromExp(exp.exp(1)).equals("boolean")){
+                System.err.println("Both sides must be boolean: " + exp.getText());
+                System.exit(1);
+            }
+            return "boolean";
+        }
+
+        if(exp.LEQ() != null || exp.MEQ() != null || exp.LESSTHAN() != null || exp.MORETHAN() != null){
+            if(!getTypeFromExp(exp.exp(0)).matches("int|long") || !getTypeFromExp(exp.exp(1)).matches("int|long")) {
+                System.err.println("Both sides must be numbers: " +  exp.getText());
+                System.exit(1);
+            }
+            return "boolean";
+        }
+        if(exp.PLUS() != null || exp.MINUS() != null || exp.MULT() != null){
+            if(!getTypeFromExp(exp.exp(0)).matches("int|long") || !getTypeFromExp(exp.exp(1)).matches("int|long")) {
+                System.err.println("Both sides must be numbers: " +  exp.getText());
+                System.exit(1);
+            } if(getTypeFromExp(exp.exp(0)).equals("long") || getTypeFromExp(exp.exp(1)).equals("long")){
+                return "long";
+            } else{
+                return "int";
+            }
+        }
+        if(exp.EQ() != null || exp.NEQ() != null){
+            String e1 = getTypeFromExp(exp.exp(0));
+            String e2 = getTypeFromExp(exp.exp(1));
+            if(e1.matches("int|long")){
+                if(!e2.matches("int|long")){
+                    System.err.println("Can not match " + e1 + " with " + e2);
+                    System.exit(1);
+                }else{
+                    return "boolean";
+                }
+            } else{
+                if(!e1.equals(e2)){
+                    System.err.println("Can not match " + e1 + " with " + e2);
+                    System.exit(1);
+                }else{
+                    return "boolean";
+                }
+            }
+        }
+        if(exp.NOT() != null){
+            if(!getTypeFromExp(exp.exp(0)).equals("boolean")){
+                System.err.println("Need boolean value for NOT on line: " + exp.NOT().getSymbol().getLine());
+                System.exit(1);
+            } else{
+                return "boolean";
+            }
+        }
+
+        if(exp.LEFTPAREN() != null){
+            return getTypeFromExp(exp.exp(0));
+        }
+
+        //Bara ID kvar
+
+        return getTypeFromId(exp.ID());
+    }
+
+    public boolean checkMethodParams(MethodSymbol method, javagrammarParser.ExplistContext eList){
+        int nrOfExp = 0;
+        ArrayList<String> typeList = new ArrayList<String>();
+        if(eList.exp() != null){
+            nrOfExp++;
+            typeList.add(getTypeFromExp(eList.exp()));
+            for(javagrammarParser.ExprestContext rest : eList.exprest()){
+                nrOfExp++;
+                typeList.add(getTypeFromExp(rest.exp()));
+            }
+            ArrayList<VariableSymbol> params = method.getParams();
+            if(params.size() != nrOfExp){
+                return false;
+            }
+            for(int i = 0; i<nrOfExp; i++){
+                if(typeList.get(i) != params.get(i).getType()){
+                    return false;
+                }
+            }
+
+        } else{
+            if(method.getParams().size() != 0){
+                return false;
+            }
+        }
+        return true;
+
     }
 
     public String getTypeFromId(TerminalNode id){
+        System.out.println(id.getText());
         if(currMethod.varExists(id.getText())){
             return currMethod.getVar(id.getText()).getType();
-        }else if(currMethod.paramExists(id.getText())){
-            return currMethod.getParam(id.getText()).getType();
         }else if(currClass.varExists(id.getText())){
             return currClass.getVar(id.getText()).getType();
         }
@@ -148,8 +262,6 @@ public class StatementValidator extends javagrammarBaseListener{
     public VariableSymbol getVarFromId(TerminalNode id){
         if(currMethod.varExists(id.getText())){
             return currMethod.getVar(id.getText());
-        }else if(currMethod.paramExists(id.getText())){
-            return currMethod.getParam(id.getText());
         }else if(currClass.varExists(id.getText())){
             return currClass.getVar(id.getText());
         }

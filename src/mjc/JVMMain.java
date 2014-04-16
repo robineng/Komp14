@@ -34,8 +34,8 @@ public class JVMMain {
             //javagrammarSymbolListener listener = new javagrammarSymbolListener();
             //walker.walk(listener, context);
 
-            //JasminTranslator translator = new JasminTranslator();
-            //walker.walk(translator, context);
+            JasminTranslator translator = new JasminTranslator();
+            walker.walk(translator, context);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);

@@ -1,4 +1,5 @@
 package mjc;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -6,25 +7,26 @@ import java.util.HashMap;
  */
 public class MethodSymbol {
     private String type;
-    private HashMap<String, VariableSymbol> params;
+    private ArrayList<VariableSymbol> params;
     private HashMap<String, VariableSymbol> vars;
 
     public MethodSymbol(){
-        params = new HashMap<String, VariableSymbol>();
+        params = new ArrayList<VariableSymbol>();
         vars = new HashMap<String, VariableSymbol>();
     }
 
     public MethodSymbol(String type){
         this.type = type;
-        params = new HashMap<String, VariableSymbol>();
+        params = new ArrayList<VariableSymbol>();
         vars = new HashMap<String, VariableSymbol>();
     }
 
     public boolean addParam(String id, VariableSymbol sym){
-        if(this.params.containsKey(id)){
+        if(this.vars.containsKey(id)){
             return false;
         }
-        this.params.put(id, sym);
+        this.vars.put(id, sym);
+        this.params.add(sym);
         return true;
     }
 
@@ -40,17 +42,14 @@ public class MethodSymbol {
         return this.vars.get(id);
     }
 
-    public VariableSymbol getParam(String id){
-        return this.params.get(id);
+    public ArrayList<VariableSymbol> getParams(){
+        return this.params;
     }
 
     public boolean varExists(String id){
         return this.vars.containsKey(id);
     }
 
-    public boolean paramExists(String id){
-        return this.params.containsKey(id);
-    }
 
 
     public String getType() {
@@ -61,19 +60,8 @@ public class MethodSymbol {
         this.type = type;
     }
 
-    public HashMap<String, VariableSymbol> getParams() {
-        return params;
-    }
-
-    public void setParams(HashMap<String, VariableSymbol> params) {
-        this.params = params;
-    }
-
     public HashMap<String, VariableSymbol> getVars() {
         return vars;
     }
 
-    public void setVars(HashMap<String, VariableSymbol> vars) {
-        this.vars = vars;
-    }
 }
