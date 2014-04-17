@@ -6,13 +6,36 @@ class bla {
   public static void main(String[] args) {
     int g;
     boolean b;
+    boolean p;
+    boolean x;
     int[] z;
     kek k;
+    if(b && p || g < z[g] && x) {
+    } 
   }
 }
 
 class main {
     int g;
+}
+
+class testingMethods {
+  int x;
+  int y;
+  int z;
+
+  public int randomArithmetic (int x, int y, int z) {
+    int xyz;
+    xyz = x;
+    xyz = x + y - z;
+    return xyz;
+  }
+
+  public int testingRandomArithmetic() {
+    int x;
+    x = 3;
+    return this.randomArithmetic(3, 5, x);
+  }
 }
 
 

@@ -71,10 +71,10 @@ public class StatementValidator extends javagrammarBaseListener{
             }else{
                 VariableSymbol arr = getVarFromId(ctx.ID());
                 String expType = getTypeFromExp(ctx.exp(1));
-                if(!arr.isInitiated()){
+                /*if(!arr.isInitiated()){
                     System.err.println("Variable isn't initiated on line: " + ctx.ASSIGNMENT().getSymbol().getLine());
                     System.exit(1);
-                }
+                }*/
                 if(!expType.equals(arr.getArrayElementType())){
                     System.err.println("Can not assign " + expType + " to " + arr.getArrayElementType() + " array on line: " + ctx.ASSIGNMENT().getSymbol().getLine());
                     System.exit(1);
@@ -87,7 +87,7 @@ public class StatementValidator extends javagrammarBaseListener{
 
 
     public String getTypeFromExp(javagrammarParser.ExpContext exp){
-        //System.out.println("exp: " + exp.getText());
+        //Basic values
         if(exp.INT_LIT() != null){
             return "int";
         }
@@ -101,12 +101,6 @@ public class StatementValidator extends javagrammarBaseListener{
             return this.currClass.getId();
         }
         if(exp.NEW() != null){
-            if(exp.INT() != null){
-                return "int[]";
-            }
-            if(exp.LONG() != null){
-                return "long[]";
-            }
             if(exp.ID() != null){
                 if(!classes.containsKey(exp.ID().getText())){
                     System.err.println("Class " + exp.ID().getText() + " not found on line: " + exp.ID().getSymbol().getLine());
@@ -114,6 +108,15 @@ public class StatementValidator extends javagrammarBaseListener{
                 }else{
                     return exp.ID().getText();
                 }
+            }
+            if(!getTypeFromExp(exp.exp(0)).equals("int")) {
+                System.err.println("Must have an integer that specifices length on line: " + exp.NEW().getSymbol().getLine());
+            }
+            if(exp.INT() != null){
+                return "int[]";
+            }
+            if(exp.LONG() != null){
+                return "long[]";
             }
         }
         if(exp.LENGTH() != null){
@@ -141,10 +144,8 @@ public class StatementValidator extends javagrammarBaseListener{
                 System.exit(1);
             }
             return meth.getType();
-
-
-
         }
+
         if(exp.LEFTBRACKET() != null){
             if(!getTypeFromExp(exp.exp(1)).equals("int")){
                 System.err.println("Index need to be integer on line: " + exp.LEFTBRACKET().getSymbol().getLine());
@@ -153,10 +154,6 @@ public class StatementValidator extends javagrammarBaseListener{
             String type = getTypeFromExp(exp.exp(0));
             if(!type.matches("int\\[\\]|long\\[\\]")){
                 System.err.println("Must be int or long array on line: " + exp.LEFTBRACKET().getSymbol().getLine());
-                System.exit(1);
-            }
-            if(!getTypeFromExp(exp.exp(1)).equals("int")) {
-                System.err.println("Must have an integer inside brackets on line: " + exp.LEFTBRACKET().getSymbol().getLine());
                 System.exit(1);
             }
             return type.split("\\[")[0];
@@ -220,7 +217,6 @@ public class StatementValidator extends javagrammarBaseListener{
         }
 
         //Bara ID kvar
-
         return getTypeFromId(exp.ID());
     }
 
