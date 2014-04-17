@@ -29,6 +29,16 @@ class kek {
         return k;
 
     }
+    
+
+    public int arraytest() {
+      int[] a;
+      int b;
+      int c;
+      if(b < a[c]) {
+      }
+      return b;
+    }
 
     public int[] givearray(){
         return new int[5];

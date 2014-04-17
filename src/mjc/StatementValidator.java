@@ -155,7 +155,10 @@ public class StatementValidator extends javagrammarBaseListener{
                 System.err.println("Must be int or long array on line: " + exp.LEFTBRACKET().getSymbol().getLine());
                 System.exit(1);
             }
-            return type;
+            if(!getTypeFromExp(exp.exp(1)).equals("int")) {
+                System.err.println("Must have an integer inside brackets on line: " + exp.LEFTBRACKET().getSymbol().getLine());
+            }
+            return type.split("\\[")[0];
         }
 
         if(exp.AND() != null || exp.OR() != null){
