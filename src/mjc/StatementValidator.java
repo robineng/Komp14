@@ -157,6 +157,7 @@ public class StatementValidator extends javagrammarBaseListener{
             }
             if(!getTypeFromExp(exp.exp(1)).equals("int")) {
                 System.err.println("Must have an integer inside brackets on line: " + exp.LEFTBRACKET().getSymbol().getLine());
+                System.exit(1);
             }
             return type.split("\\[")[0];
         }
