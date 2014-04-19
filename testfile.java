@@ -1,107 +1,22 @@
-/*
-*test
- */
-
-class bla {
-  public static void main(String[] args) {
-    int g;
-    int main;
-    boolean b;
-    boolean p;
-    boolean x;
-    int[] z;
-    kek k;
-    z = new int[10];
-
-    if(b && p || g < z[g] && x) {
-    } 
-  }
-}
-
-class main {
-    int g;
-}
-
-class testingMethods {
-  int x;
-  int y;
-  int z;
-
-  public int randomArithmetic (int x, int y, int z) {
-    int xyz;
-    xyz = x;
-    xyz = x + y - z;
-    return xyz;
-  }
-
-  public int testingRandomArithmetic() {
-    int x;
-    x = 3;
-    return this.randomArithmetic(3, 5, x);
-  }
-}
-
-
-
-class kek {
-    int x;
-    int y;
-    int g;
-
-    public int lol(int i){
-        int x;
-        int k;
-        k = i;
-        return k;
-
-    }
-    
-
-    public int arraytest() {
-      int[] a;
-      int b;
-      int c;
-      a = new int[20];
-      if(b < a[c]) {
-      }
-      return b;
-    }
-
-    public int[] givearray(){
-        return new int[5];
-    }
-
-
-
-    public boolean truer() {
+class Mainclass{
+    public static void main(String[] args){
+        int[] a;
         int i;
-        i = this.newrofl();
-        return true;
-    }
-    public int newrofl(){
-        return 1;
-    }
-    public boolean kek(int pop) {
-        kek a;
-        boolean b;
-        a = new kek();
-        b = a.truer();
-        x = 3;
-        pop = 4;
-        x = pop;
-        pop = x;
-        return (true && this.truer());
+        klasse k;
+        k = new klasse();
+        a = new int[10];
+        i = a[10];
+
     }
 }
 
-class newpop  {
-    public int newpop() {
-        return 1;
-    }
-    public int s(int newpop) {
-        return this.newpop();
-    }
-    public int kekpop(){
-        return this.s(this.newpop());
+class klasse{
+    int[] kek;
+    public int[] gief(){
+        int[] kek;
+        int i;
+        kek = new int[5];
+        i = this.kek[5];
+        return kek;
     }
 }
