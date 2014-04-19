@@ -22,14 +22,27 @@ public class SymbolRecorder extends javagrammarBaseListener{
         return this.classes;
     }
 
-    @Override public void enterMainclass(@NotNull javagrammarParser.MainclassContext ctx) {
-        ClassSymbol mainClass = new ClassSymbol(ctx.ID(0).getText());
+    @Override public void enterProgram(@NotNull javagrammarParser.ProgramContext ctx){
+        javagrammarParser.MainclassContext main = ctx.mainclass();
+        ClassSymbol mainClass = new ClassSymbol(main.ID(0).getText());
         MethodSymbol mainMethod = new MethodSymbol("void");
-        mainMethod.addParam(ctx.ID(2).getText(), new VariableSymbol("String[]"));
+        mainMethod.addParam(main.ID(2).getText(), new VariableSymbol("String[]"));
         mainClass.addMethod("main", mainMethod);
-        this.classes.put(ctx.ID(0).getText(), mainClass);
-        this.currClass = mainClass;
-        this.currMethod = mainMethod;
+        this.classes.put(main.ID(0).getText(), mainClass);
+
+        for(javagrammarParser.ClassdeclContext cl : ctx.classdecl()){
+            if(this.classes.containsKey(cl.ID().getText())){
+                System.err.println("Class name already exists on line: " + cl.ID().getSymbol().getLine());
+                System.exit(1);
+            }
+            ClassSymbol cla = new ClassSymbol(cl.ID().getText());
+            this.classes.put(cl.ID().getText(), cla);
+        }
+    }
+
+    @Override public void enterMainclass(@NotNull javagrammarParser.MainclassContext ctx) {
+        this.currClass = this.classes.get(ctx.ID(0).getText());
+        this.currMethod = this.currClass.getMethod("main");
     }
 
     @Override public void exitMainclass(@NotNull javagrammarParser.MainclassContext ctx) {
@@ -37,13 +50,7 @@ public class SymbolRecorder extends javagrammarBaseListener{
     }
 
     @Override public void enterClassdecl(@NotNull javagrammarParser.ClassdeclContext ctx){
-        if(this.classes.containsKey(ctx.ID().getText())){
-            System.err.println("Class name already exists on line: " + ctx.ID().getSymbol().getLine());
-            System.exit(1);
-        }
-        ClassSymbol cl = new ClassSymbol(ctx.ID().getText());
-        this.classes.put(ctx.ID().getText(), cl);
-        this.currClass = cl;
+        this.currClass = this.classes.get(ctx.ID().getText());
     }
 
     @Override public void enterMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
@@ -78,6 +85,10 @@ public class SymbolRecorder extends javagrammarBaseListener{
         if(this.currMethod == null){
             VariableSymbol var = new VariableSymbol(ctx.type().getText());
             var.setInitiated(true);
+            if(ctx.type().ID() != null && !classes.containsKey(ctx.type().ID().getText())){
+                System.err.println("Can not find class " + ctx.type().ID().getText() + " on line " + ctx.ID().getSymbol().getLine());
+                System.exit(1);
+            }
             if(this.currClass.addVar(ctx.ID().getText(), var)){
                 return;
             }else{
@@ -85,6 +96,10 @@ public class SymbolRecorder extends javagrammarBaseListener{
                 System.exit(1);
             }
         }else{
+            if(ctx.type().ID() != null && !classes.containsKey(ctx.type().ID().getText())){
+                System.err.println("Can not find class " + ctx.type().ID().getText() + " on line " + ctx.ID().getSymbol().getLine());
+                System.exit(1);
+            }
             if(this.currMethod.addVar(ctx.ID().getText(), new VariableSymbol(ctx.type().getText()))){
                 return;
             }else{

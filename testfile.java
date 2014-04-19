@@ -11,6 +11,8 @@ class bla {
     boolean x;
     int[] z;
     kek k;
+    z = new int[10];
+
     if(b && p || g < z[g] && x) {
     } 
   }
@@ -59,6 +61,7 @@ class kek {
       int[] a;
       int b;
       int c;
+      a = new int[20];
       if(b < a[c]) {
       }
       return b;
