@@ -14,7 +14,6 @@ public class StatementValidator extends javagrammarBaseListener{
     HashMap<String, ClassSymbol> classes;
     ClassSymbol currClass;
     MethodSymbol currMethod;
-    String mainclassName;
 
     public StatementValidator(HashMap<String, ClassSymbol> classes){
         this.classes = classes;
@@ -23,7 +22,6 @@ public class StatementValidator extends javagrammarBaseListener{
     @Override public void enterMainclass(@NotNull javagrammarParser.MainclassContext ctx) {
         this.currClass = classes.get(ctx.ID(0).getText());
         this.currMethod = currClass.getMethod("main");
-        this.mainclassName = ctx.ID(0).getText();
     }
 
     @Override public void exitMainclass(@NotNull javagrammarParser.MainclassContext ctx) {
@@ -220,7 +218,7 @@ public class StatementValidator extends javagrammarBaseListener{
         }
 
         //Bara ID kvar
-        if(!getVarFromId(exp.ID()).isInitiated() && !exp.ID().getText().equals(this.mainclassName)){
+        if(!getVarFromId(exp.ID()).isInitiated()){
             System.err.println(exp.ID().getText() + " is not initialised on line " + exp.ID().getSymbol().getLine());
             System.exit(1);
         }
