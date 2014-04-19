@@ -39,13 +39,13 @@ public class StatementValidator extends javagrammarBaseListener{
 
     @Override public void enterMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
         this.currMethod = this.currClass.getMethod(ctx.ID().getText());
+    }
+
+    @Override public void exitMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
         if(!getTypeFromExp(ctx.exp()).equals(this.currMethod.getType())){
             System.err.println("Method must return a " + this.currMethod.getType() + " on line: " + ctx.RETURN().getSymbol().getLine());
             System.exit(1);
         }
-    }
-
-    @Override public void exitMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
         this.currMethod = null;
     }
 
@@ -126,14 +126,6 @@ public class StatementValidator extends javagrammarBaseListener{
                 System.err.println("Must take length off arrays on line: " + exp.LENGTH().getSymbol().getLine());
                 System.exit(1);
             }
-            VariableSymbol arr = getVarFromExpId(exp.exp(0));
-           if(arr != null){
-               if(!arr.isInitiated()){
-                   System.err.println(exp.exp(0).getText() + " is not initiated on line " + exp.LENGTH().getSymbol().getLine());
-                   System.exit(1);
-               }
-
-           }
            return "int";
         }
         if(exp.DOT() != null){
@@ -152,13 +144,6 @@ public class StatementValidator extends javagrammarBaseListener{
                 System.err.println("Parameter failure on line: " + exp.DOT().getSymbol().getLine());
                 System.exit(1);
             }
-            VariableSymbol classSymbol = getVarFromExpId(exp.exp(0));
-            if(classSymbol != null){
-                if(!classSymbol.isInitiated()){
-                    System.err.println("Class " + exp.exp(0).getText() + " not initiated on line " + exp.DOT().getSymbol().getLine());
-                    System.exit(1);
-                }
-            }
             return meth.getType();
         }
 
@@ -171,13 +156,6 @@ public class StatementValidator extends javagrammarBaseListener{
             if(!type.matches("int\\[\\]|long\\[\\]")){
                 System.err.println("Must be int or long array on line: " + exp.LEFTBRACKET().getSymbol().getLine());
                 System.exit(1);
-            }
-            VariableSymbol arr = getVarFromExpId(exp.exp(0));
-            if(arr != null){
-                if(!arr.isInitiated()){
-                    System.err.println(exp.exp(0).getText()+ " is not init on line " + exp.LEFTBRACKET().getSymbol().getLine());
-                    System.exit(1);
-                }
             }
             return type.split("\\[")[0];
         }
@@ -240,6 +218,10 @@ public class StatementValidator extends javagrammarBaseListener{
         }
 
         //Bara ID kvar
+        if(!getVarFromId(exp.ID()).isInitiated()){
+            System.err.println(exp.ID().getText() + " is not initialised on line " + exp.ID().getSymbol().getLine());
+            System.exit(1);
+        }
         return getTypeFromId(exp.ID());
     }
 
@@ -295,14 +277,4 @@ public class StatementValidator extends javagrammarBaseListener{
         System.exit(1);
         return null;
     }
-
-    public VariableSymbol getVarFromExpId(javagrammarParser.ExpContext exp){
-        //Exp may only be an id, nothing more
-        if(exp.ID() != null && exp.LEFTPAREN() == null){
-            return getVarFromId(exp.ID());
-        }
-        return null;
-    }
-
-
 }

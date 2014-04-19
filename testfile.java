@@ -16,7 +16,6 @@ class klasse{
         int[] kek;
         int i;
         kek = new int[5];
-        i = this.kek[5];
         return kek;
     }
 }
