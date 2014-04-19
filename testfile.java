@@ -5,6 +5,7 @@
 class bla {
   public static void main(String[] args) {
     int g;
+    int main;
     boolean b;
     boolean p;
     boolean x;

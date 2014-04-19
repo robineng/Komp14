@@ -25,7 +25,7 @@ public class SymbolRecorder extends javagrammarBaseListener{
     @Override public void enterMainclass(@NotNull javagrammarParser.MainclassContext ctx) {
         ClassSymbol mainClass = new ClassSymbol(ctx.ID(0).getText());
         MethodSymbol mainMethod = new MethodSymbol("void");
-        mainMethod.addParam(ctx.ID(1).getText(), new VariableSymbol("String[]"));
+        mainMethod.addParam(ctx.ID(2).getText(), new VariableSymbol("String[]"));
         mainClass.addMethod("main", mainMethod);
         this.classes.put(ctx.ID(0).getText(), mainClass);
         this.currClass = mainClass;
