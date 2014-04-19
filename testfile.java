@@ -1,21 +1,18 @@
-class Mainclass{
-    public static void main(String[] args){
-        int[] a;
-        int i;
-        klasse k;
-        k = new klasse();
-        a = new int[10];
-        i = a[10];
-
+class Mainclass {
+    public static void main(String[] args) {
     }
 }
 
-class klasse{
-    int[] kek;
-    public int[] gief(){
-        int[] kek;
-        int i;
-        kek = new int[5];
-        return kek;
+class TestingVariables {
+    int x;
+    int y;
+
+    public int toTryParamsWith(int x, int y) {
+        return x;
+    }
+
+    public int tryWithWeirdParams() {
+        int y;
+        return this.toTryParamsWith(x,y);
     }
 }

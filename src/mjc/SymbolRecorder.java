@@ -103,7 +103,9 @@ public class SymbolRecorder extends javagrammarBaseListener{
                 System.err.println("Can not find class " + ctx.type().ID().getText() + " on line " + ctx.ID().getSymbol().getLine());
                 System.exit(1);
             }
-            if(this.currMethod.addVar(ctx.ID().getText(), new VariableSymbol(ctx.type().getText()))){
+            VariableSymbol var = new VariableSymbol(ctx.type().getText());
+            var.setInitiated(true);
+            if(this.currMethod.addVar(ctx.ID().getText(), var)){
                 return;
             }else{
                 System.err.println("Method variable already defined at line: " + ctx.ID().getSymbol().getLine());
