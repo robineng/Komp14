@@ -120,6 +120,7 @@ public class StatementValidator extends javagrammarBaseListener{
             }
         }
         if(exp.LENGTH() != null){
+            //TODO Kolla så att arrayen är initierad
             if(!getTypeFromExp(exp.exp(0)).matches("int\\[\\]|long\\[\\]")){
                 System.err.println("Must take length off arrays on line: " + exp.LENGTH().getSymbol().getLine());
                 System.exit(1);
@@ -128,6 +129,7 @@ public class StatementValidator extends javagrammarBaseListener{
             }
         }
         if(exp.DOT() != null){
+            //TODO Kolla så att klassen är initierad
             String cl = getTypeFromExp(exp.exp(0));
             if(!classes.containsKey(cl)){
                 System.err.println("Class " + cl + " not found on line: " + exp.DOT().getSymbol().getLine());
@@ -147,6 +149,7 @@ public class StatementValidator extends javagrammarBaseListener{
         }
 
         if(exp.LEFTBRACKET() != null){
+            //TODO Kolla så arrayen är initierad
             if(!getTypeFromExp(exp.exp(1)).equals("int")){
                 System.err.println("Index need to be integer on line: " + exp.LEFTBRACKET().getSymbol().getLine());
                 System.exit(1);

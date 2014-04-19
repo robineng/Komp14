@@ -76,7 +76,9 @@ public class SymbolRecorder extends javagrammarBaseListener{
 
     @Override public void enterVardecl(@NotNull javagrammarParser.VardeclContext ctx) {
         if(this.currMethod == null){
-            if(this.currClass.addVar(ctx.ID().getText(), new VariableSymbol(ctx.type().getText()))){
+            VariableSymbol var = new VariableSymbol(ctx.type().getText());
+            var.setInitiated(true);
+            if(this.currClass.addVar(ctx.ID().getText(), var)){
                 return;
             }else{
                 System.err.println("Class variable already defined at line: " + ctx.ID().getSymbol().getLine());
