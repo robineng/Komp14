@@ -66,6 +66,7 @@ public class StatementValidator extends javagrammarBaseListener{
                 String expType = getTypeFromExp(ctx.exp(0));
                 if(!idType.equals(expType) && !(idType.equals("long") && expType.equals("int"))){
                     System.err.println("Can not assign " + expType + " to " + idType + " on line: " + ctx.ASSIGNMENT().getSymbol().getLine());
+                    System.exit(1);
                 }
                 var.setInitiated(true);
             }else{
@@ -172,12 +173,12 @@ public class StatementValidator extends javagrammarBaseListener{
                 System.exit(1);
             }
             VariableSymbol arr = getVarFromExpId(exp.exp(0));
-            if(arr != null){
+            /*if(arr != null){
                 if(!arr.isInitiated()){
                     System.err.println(exp.exp(0).getText()+ " is not init on line " + exp.LEFTBRACKET().getSymbol().getLine());
                     System.exit(1);
                 }
-            }
+            }*/
             return type.split("\\[")[0];
         }
 
