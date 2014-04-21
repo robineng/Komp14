@@ -39,7 +39,6 @@ public class JVMMain {
             walker.walk(translator, context);
             } else {
                 System.err.println("Syntax errors!");
-                parser.getRuleContext().exception.printStackTrace();
                 System.exit(1);
             }
         } catch (Exception e) {

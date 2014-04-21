@@ -20,7 +20,8 @@ public class VariableSymbol {
     }
 
     public boolean isInitiated() {
-        return initiated;
+        //return initiated;
+        return true;
     }
 
     public void setInitiated(boolean initiated){
