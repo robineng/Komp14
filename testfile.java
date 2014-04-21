@@ -2,9 +2,10 @@
 *test
  */
 
-class bla {
+class bla { {
   public static void main(String[] args) {
     int g;
+    g = x;
     boolean b;
     boolean p;
     boolean x;

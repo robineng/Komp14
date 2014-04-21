@@ -85,7 +85,6 @@ public class StatementValidator extends javagrammarBaseListener{
         }
     }
 
-
     public String getTypeFromExp(javagrammarParser.ExpContext exp){
         //Basic values
         if(exp.INT_LIT() != null){

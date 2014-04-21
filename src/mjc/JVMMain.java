@@ -1,7 +1,7 @@
 package mjc;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.io.FileInputStream;
@@ -18,6 +18,7 @@ public class JVMMain {
             CommonTokenStream tokens = new CommonTokenStream(lexer);
 
             javagrammarParser parser = new javagrammarParser(tokens);
+            parser.setErrorHandler(new BailErrorStrategy());
             javagrammarParser.ProgramContext context = parser.program();
 
             ParseTreeWalker walker = new ParseTreeWalker();
@@ -36,8 +37,8 @@ public class JVMMain {
 
             JasminTranslator translator = new JasminTranslator();
             walker.walk(translator, context);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Error during parsing: " + e.getMessage());
             System.exit(1);
         }
     }
