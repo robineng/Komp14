@@ -1,8 +1,8 @@
 #! /bin/sh
 
-CURRDIR=pwd
-mv .git ~/.git
+
+mv .git ../.git
 
 ./tigrissubmit ~/Komp14/
 
-mv ~/.git $CURRDIR
+mv ../.git .git

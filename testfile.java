@@ -1,104 +1,32 @@
-/*
-*test
- */
-
-class bla { {
-  public static void main(String[] args) {
-    int g;
-    g = x;
-    boolean b;
-    boolean p;
-    boolean x;
-    int[] z;
-    kek k;
-    if(b && p || g < z[g] && x) {
-    } 
+class bullshitamain {
+  public static void main(String[] arhs) {
   }
 }
-
-class main {
-    int g;
-}
-
-class testingMethods {
-  int x;
-  int y;
-  int z;
-
-  public int randomArithmetic (int x, int y, int z) {
-    int xyz;
-    xyz = x;
-    xyz = x + y - z;
-    return xyz;
-  }
-
-  public int testingRandomArithmetic() {
-    int x;
-    x = 3;
-    return this.randomArithmetic(3, 5, x);
-  }
-}
-
-
-
-class kek {
+class TestingVariables {
     int x;
     int y;
-    int g;
 
-    public int lol(int i){
-        int x;
-        int k;
-        k = i;
-        return k;
-
-    }
-    
-
-    public int arraytest() {
-      int[] a;
-      int b;
-      int c;
-      if(b < a[c]) {
-      }
-      return b;
+    public int toTryParamsWith(int x, int y, boolean z) {
+        return x;
     }
 
-    public int[] givearray(){
-        return new int[5];
+    public int tryWithWeirdParams() {
+        int y;
+        return this.toTryParamsWith(x,y,true);
     }
 
-
-
-    public boolean truer() {
-        int i;
-        i = this.newrofl();
-        return true;
-    }
-    public int newrofl(){
-        return 1;
-    }
-    public boolean kek(int pop) {
-        kek a;
+    public int tryOtherWeirdParams() {
         boolean b;
-        a = new kek();
-        b = a.truer();
-        x = 3;
-        pop = 4;
-        x = pop;
-        pop = x;
-        return (true && this.truer());
+        if(x < y && y > x && b && b) {
+            System.out.println(x < y && y < b);
+            //System.out.println(x);
+        }
+        return 3;
     }
 }
 
-class newpop  {
-    public int newpop() {
-        return 1;
-    }
-    public int s(int newpop) {
-        return this.newpop();
-    }
-    public int kekpop(){
-        return this.s(this.newpop());
+class otherclass {
+    public boolean functionThatDoesNotReturnInt() {
+        return true;
     }
 }

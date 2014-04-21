@@ -39,13 +39,13 @@ public class StatementValidator extends javagrammarBaseListener{
 
     @Override public void enterMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
         this.currMethod = this.currClass.getMethod(ctx.ID().getText());
+    }
+
+    @Override public void exitMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
         if(!getTypeFromExp(ctx.exp()).equals(this.currMethod.getType())){
             System.err.println("Method must return a " + this.currMethod.getType() + " on line: " + ctx.RETURN().getSymbol().getLine());
             System.exit(1);
         }
-    }
-
-    @Override public void exitMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
         this.currMethod = null;
     }
 
@@ -66,15 +66,16 @@ public class StatementValidator extends javagrammarBaseListener{
                 String expType = getTypeFromExp(ctx.exp(0));
                 if(!idType.equals(expType) && !(idType.equals("long") && expType.equals("int"))){
                     System.err.println("Can not assign " + expType + " to " + idType + " on line: " + ctx.ASSIGNMENT().getSymbol().getLine());
+                    System.exit(1);
                 }
                 var.setInitiated(true);
             }else{
                 VariableSymbol arr = getVarFromId(ctx.ID());
                 String expType = getTypeFromExp(ctx.exp(1));
-                /*if(!arr.isInitiated()){
+                if(!arr.isInitiated()){
                     System.err.println("Variable isn't initiated on line: " + ctx.ASSIGNMENT().getSymbol().getLine());
                     System.exit(1);
-                }*/
+                }
                 if(!expType.equals(arr.getArrayElementType())){
                     System.err.println("Can not assign " + expType + " to " + arr.getArrayElementType() + " array on line: " + ctx.ASSIGNMENT().getSymbol().getLine());
                     System.exit(1);
@@ -119,12 +120,12 @@ public class StatementValidator extends javagrammarBaseListener{
             }
         }
         if(exp.LENGTH() != null){
+
             if(!getTypeFromExp(exp.exp(0)).matches("int\\[\\]|long\\[\\]")){
                 System.err.println("Must take length off arrays on line: " + exp.LENGTH().getSymbol().getLine());
                 System.exit(1);
-            }else{
-                return "int";
             }
+           return "int";
         }
         if(exp.DOT() != null){
             String cl = getTypeFromExp(exp.exp(0));
@@ -216,6 +217,10 @@ public class StatementValidator extends javagrammarBaseListener{
         }
 
         //Bara ID kvar
+        if(!getVarFromId(exp.ID()).isInitiated()){
+            System.err.println(exp.ID().getText() + " is not initialised on line " + exp.ID().getSymbol().getLine());
+            System.exit(1);
+        }
         return getTypeFromId(exp.ID());
     }
 
@@ -248,14 +253,13 @@ public class StatementValidator extends javagrammarBaseListener{
 
     }
 
+
     public String getTypeFromId(TerminalNode id){
         //System.out.println(id.getText());
         if(currMethod.varExists(id.getText())){
             return currMethod.getVar(id.getText()).getType();
         }else if(currClass.varExists(id.getText())){
             return currClass.getVar(id.getText()).getType();
-        } else if(classes.containsKey(id.getText())){
-            return id.getText();
         }
         System.err.println("Can not find variable: " + id.getText() + " on line: " + id.getSymbol().getLine());
         System.exit(1);
@@ -272,6 +276,4 @@ public class StatementValidator extends javagrammarBaseListener{
         System.exit(1);
         return null;
     }
-
-
 }

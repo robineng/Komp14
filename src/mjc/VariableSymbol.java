@@ -23,7 +23,7 @@ public class VariableSymbol {
         return initiated;
     }
 
-    public void setInitiated(boolean initiated) {
+    public void setInitiated(boolean initiated){
         this.initiated = initiated;
     }
 
