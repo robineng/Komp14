@@ -18,9 +18,9 @@ public class JVMMain {
             CommonTokenStream tokens = new CommonTokenStream(lexer);
 
             javagrammarParser parser = new javagrammarParser(tokens);
-            parser.setErrorHandler(new BailErrorStrategy());
             javagrammarParser.ProgramContext context = parser.program();
 
+            if(parser.getNumberOfSyntaxErrors() == 0) {
             ParseTreeWalker walker = new ParseTreeWalker();
 
             SymbolRecorder rec = new SymbolRecorder();
@@ -37,8 +37,13 @@ public class JVMMain {
 
             JasminTranslator translator = new JasminTranslator();
             walker.walk(translator, context);
+            } else {
+                System.err.println("Syntax errors!");
+                parser.getRuleContext().exception.printStackTrace();
+                System.exit(1);
+            }
         } catch (Exception e) {
-            System.err.println("Error during parsing: " + e.getMessage());
+            e.printStackTrace();
             System.exit(1);
         }
     }
