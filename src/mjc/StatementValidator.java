@@ -116,6 +116,7 @@ public class StatementValidator extends javagrammarBaseListener{
             }
             if(!getTypeFromExp(exp.exp(0)).equals("int")) {
                 System.err.println("Must have an integer that specifices length on line: " + exp.NEW().getSymbol().getLine());
+                System.exit(1);
             }
             if(exp.INT() != null){
                 return "int[]";
@@ -161,7 +162,7 @@ public class StatementValidator extends javagrammarBaseListener{
                 System.err.println("Must be int or long array on line: " + exp.LEFTBRACKET().getSymbol().getLine());
                 System.exit(1);
             }
-            //Tillfälligt fulhack
+            //Tillfälligt fulhack, eller inte?
             if(exp.exp(0).LEFTBRACKET() != null){
                 System.err.println("Can not handle multidimensional arrays on line " + exp.LEFTBRACKET().getSymbol().getLine());
                 System.exit(1);
