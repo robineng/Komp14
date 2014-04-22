@@ -95,15 +95,15 @@ public class StatementValidator extends javagrammarBaseListener{
         //Basic values
         if(exp.INT_LIT() != null){
             int intLit = Integer.parseInt(exp.INT_LIT().getText());
-            if(intLit > Integer.MAX_VALUE || intLit < Integer.MIN_VALUE){
+            if(intLit > Integer.MAX_VALUE){
                 System.err.println("integer value out of bounds on line: " + exp.INT_LIT().getSymbol().getLine());
                 System.exit(1);
             }
             return "int";
         }
         if(exp.LONG_LIT() != null){
-            long longLit = Long.parseLong(exp.LONG_LIT().getText());
-            if(longLit > Long.MAX_VALUE || longLit < Long.MIN_VALUE){
+            long longLit = Long.parseLong(exp.LONG_LIT().getText().split("l|L")[0]);
+            if(longLit > Long.MAX_VALUE){
                 System.err.println("Long value out of bounds on line: " + exp.LONG_LIT().getSymbol().getLine());
                 System.exit(1);
             }
