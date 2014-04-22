@@ -58,6 +58,7 @@ public class StatementValidator extends javagrammarBaseListener{
         }else if(ctx.SYSO() != null){
             if(!getTypeFromExp(ctx.exp(0)).matches("int|long|boolean")){
                 System.err.println("Can not print a " + getTypeFromExp(ctx.exp(0)) + " on line: " + ctx.SYSO().getSymbol().getLine());
+                System.exit(1);
             }
         }else if(ctx.ASSIGNMENT() != null){
             if(ctx.LEFTBRACKET() == null){
@@ -116,6 +117,7 @@ public class StatementValidator extends javagrammarBaseListener{
                 return "int[]";
             }
             if(exp.LONG() != null){
+                System.out.println(exp.getText());
                 return "long[]";
             }
         }

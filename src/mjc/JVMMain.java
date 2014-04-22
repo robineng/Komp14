@@ -21,22 +21,22 @@ public class JVMMain {
             javagrammarParser.ProgramContext context = parser.program();
 
             if(parser.getNumberOfSyntaxErrors() == 0) {
-            ParseTreeWalker walker = new ParseTreeWalker();
+              ParseTreeWalker walker = new ParseTreeWalker();
 
-            SymbolRecorder rec = new SymbolRecorder();
-            walker.walk(rec, context);
+              SymbolRecorder rec = new SymbolRecorder();
+              walker.walk(rec, context);
 
-            HashMap<String, ClassSymbol> classes = rec.getClasses();
+              HashMap<String, ClassSymbol> classes = rec.getClasses();
 
-            StatementValidator valid = new StatementValidator(classes);
-            walker.walk(valid, context);
+              StatementValidator valid = new StatementValidator(classes);
+              walker.walk(valid, context);
 
 
-            //javagrammarSymbolListener listener = new javagrammarSymbolListener();
-            //walker.walk(listener, context);
+              //javagrammarSymbolListener listener = new javagrammarSymbolListener();
+              //walker.walk(listener, context);
 
-            JasminTranslator translator = new JasminTranslator();
-            walker.walk(translator, context);
+              JasminTranslator translator = new JasminTranslator();
+              walker.walk(translator, context);
             } else {
                 System.err.println("Syntax errors!");
                 System.exit(1);
