@@ -1,5 +1,8 @@
+/** int */
 public class bullshitamain {
   public static void main(String[] arhs) {
+    int x;
+    testclass t;
   }
 }
 
@@ -11,6 +14,7 @@ class testclass{
       {
         x = y;
       }
+      /**/
       return z;
   }
 }
