@@ -117,7 +117,6 @@ public class StatementValidator extends javagrammarBaseListener{
                 return "int[]";
             }
             if(exp.LONG() != null){
-                System.out.println(exp.getText());
                 return "long[]";
             }
         }
@@ -156,6 +155,11 @@ public class StatementValidator extends javagrammarBaseListener{
             String type = getTypeFromExp(exp.exp(0));
             if(!type.matches("int\\[\\]|long\\[\\]")){
                 System.err.println("Must be int or long array on line: " + exp.LEFTBRACKET().getSymbol().getLine());
+                System.exit(1);
+            }
+            //Tillfälligt fulhack
+            if(exp.exp(0).LEFTBRACKET() != null){
+                System.err.println("Can not handle multidimensional arrays on line " + exp.LEFTBRACKET().getSymbol().getLine());
                 System.exit(1);
             }
             return type.split("\\[")[0];
