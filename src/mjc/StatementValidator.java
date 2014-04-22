@@ -81,6 +81,10 @@ public class StatementValidator extends javagrammarBaseListener{
                     System.err.println("Can not assign " + expType + " to " + arr.getArrayElementType() + " array on line: " + ctx.ASSIGNMENT().getSymbol().getLine());
                     System.exit(1);
                 }
+                if(!getTypeFromExp(ctx.exp(0)).equals("int")){
+                    System.err.println("Index need to be integer on line: " + ctx.LEFTBRACKET().getSymbol().getLine());
+                    System.exit(1);
+                }
 
             }
 
