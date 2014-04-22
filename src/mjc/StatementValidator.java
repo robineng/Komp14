@@ -94,9 +94,19 @@ public class StatementValidator extends javagrammarBaseListener{
     public String getTypeFromExp(javagrammarParser.ExpContext exp){
         //Basic values
         if(exp.INT_LIT() != null){
+            int intLit = Integer.parseInt(exp.INT_LIT().getText());
+            if(intLit > Integer.MAX_VALUE || intLit < Integer.MIN_VALUE){
+                System.err.println("integer value out of bounds on line: " + exp.INT_LIT().getSymbol().getLine());
+                System.exit(1);
+            }
             return "int";
         }
         if(exp.LONG_LIT() != null){
+            long longLit = Long.parseLong(exp.INT_LIT().getText());
+            if(longLit > Integer.MAX_VALUE || longLit < Integer.MIN_VALUE){
+                System.err.println("Long value out of bounds on line: " + exp.LONG_LIT().getSymbol().getLine());
+                System.exit(1);
+            }
             return "long";
         }
         if(exp.TRUE() != null || exp.FALSE() != null){
