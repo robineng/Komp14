@@ -14,7 +14,7 @@ options
 WS : [ \t\r\n]+ -> skip;
 COMMENT1 : '//'.*?[\n] -> skip;
 COMMENT2 : '/*'.*?'*/' -> skip;
-COMMENT3 : '/**'.*?'**/' -> skip;
+//COMMENT3 : '/**'.*?'**/' -> skip;
 //Reserved words
 CLASS : 'class';
 PUBLIC : 'public';
