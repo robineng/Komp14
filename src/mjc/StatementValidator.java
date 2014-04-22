@@ -102,8 +102,8 @@ public class StatementValidator extends javagrammarBaseListener{
             return "int";
         }
         if(exp.LONG_LIT() != null){
-            long longLit = Long.parseLong(exp.INT_LIT().getText());
-            if(longLit > Integer.MAX_VALUE || longLit < Integer.MIN_VALUE){
+            long longLit = Long.parseLong(exp.LONG_LIT().getText());
+            if(longLit > Long.MAX_VALUE || longLit < Long.MIN_VALUE){
                 System.err.println("Long value out of bounds on line: " + exp.LONG_LIT().getSymbol().getLine());
                 System.exit(1);
             }
