@@ -57,7 +57,6 @@ public class SymbolRecorder extends javagrammarBaseListener{
         MethodSymbol meth = new MethodSymbol(ctx.type().getText());
         if(ctx.formallist().ID() != null){
             VariableSymbol var = new VariableSymbol(ctx.formallist().type().getText());
-            var.setInitiated(true);
             meth.addParam(ctx.formallist().ID().getText(), var);
             for(javagrammarParser.FormalrestContext frest : ctx.formallist().formalrest()){
                 var = new VariableSymbol(frest.type().getText());
@@ -87,7 +86,6 @@ public class SymbolRecorder extends javagrammarBaseListener{
     @Override public void enterVardecl(@NotNull javagrammarParser.VardeclContext ctx) {
         if(this.currMethod == null){
             VariableSymbol var = new VariableSymbol(ctx.type().getText());
-            var.setInitiated(true);
             if(ctx.type().ID() != null && !classes.containsKey(ctx.type().ID().getText())){
                 System.err.println("Can not find class " + ctx.type().ID().getText() + " on line " + ctx.ID().getSymbol().getLine());
                 System.exit(1);
@@ -104,7 +102,6 @@ public class SymbolRecorder extends javagrammarBaseListener{
                 System.exit(1);
             }
             VariableSymbol var = new VariableSymbol(ctx.type().getText());
-            var.setInitiated(true);
             if(this.currMethod.addVar(ctx.ID().getText(), var)){
                 return;
             }else{

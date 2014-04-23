@@ -5,7 +5,6 @@ package mjc;
  */
 public class VariableSymbol {
     private String type;
-    private boolean initiated;
 
     public VariableSymbol(String type){
         this.type = type;
@@ -17,15 +16,6 @@ public class VariableSymbol {
 
     public void setType(String type) {
         this.type = type;
-    }
-
-    public boolean isInitiated() {
-        //return initiated;
-        return true;
-    }
-
-    public void setInitiated(boolean initiated){
-        this.initiated = initiated;
     }
 
     public String getArrayElementType(){

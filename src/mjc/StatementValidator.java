@@ -69,14 +69,9 @@ public class StatementValidator extends javagrammarBaseListener{
                     System.err.println("Can not assign " + expType + " to " + idType + " on line: " + ctx.ASSIGNMENT().getSymbol().getLine());
                     System.exit(1);
                 }
-                var.setInitiated(true);
             }else{
                 VariableSymbol arr = getVarFromId(ctx.ID());
                 String expType = getTypeFromExp(ctx.exp(1));
-                if(!arr.isInitiated()){
-                    System.err.println("Variable isn't initiated on line: " + ctx.ASSIGNMENT().getSymbol().getLine());
-                    System.exit(1);
-                }
                 if(!expType.equals(arr.getArrayElementType())){
                     System.err.println("Can not assign " + expType + " to " + arr.getArrayElementType() + " array on line: " + ctx.ASSIGNMENT().getSymbol().getLine());
                     System.exit(1);
@@ -238,10 +233,6 @@ public class StatementValidator extends javagrammarBaseListener{
         }
 
         //Bara ID kvar
-        if(!getVarFromId(exp.ID()).isInitiated()){
-            System.err.println(exp.ID().getText() + " is not initialised on line " + exp.ID().getSymbol().getLine());
-            System.exit(1);
-        }
         return getTypeFromId(exp.ID());
     }
 
