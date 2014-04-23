@@ -110,8 +110,4 @@ public class SymbolRecorder extends javagrammarBaseListener{
             }
         }
     }
-
-
-
-
 }

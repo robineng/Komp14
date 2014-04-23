@@ -48,7 +48,10 @@ public class JVMMain {
             javagrammarParser parser = new javagrammarParser(tokens);
             javagrammarParser.ProgramContext context = parser.program();
 
-            if(parser.getNumberOfSyntaxErrors() == 0) {
+            if(parser.getNumberOfSyntaxErrors() != 0) {
+              System.err.println("Syntax errors");
+              System.exit(1);
+            }
               ParseTreeWalker walker = new ParseTreeWalker();
 
               SymbolRecorder rec = new SymbolRecorder();
@@ -63,12 +66,8 @@ public class JVMMain {
               //javagrammarSymbolListener listener = new javagrammarSymbolListener();
               //walker.walk(listener, context);
 
-              JasminTranslator translator = new JasminTranslator();
-              walker.walk(translator, context);
-            } else {
-                System.err.println("Syntax errors!");
-                System.exit(1);
-            }
+              /*JasminTranslator translator = new JasminTranslator();
+              walker.walk(translator, context);*/
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
