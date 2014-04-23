@@ -66,8 +66,8 @@ public class JVMMain {
               //javagrammarSymbolListener listener = new javagrammarSymbolListener();
               //walker.walk(listener, context);
 
-              /*JasminTranslator translator = new JasminTranslator();
-              walker.walk(translator, context);*/
+              JasminTranslator translator = new JasminTranslator();
+              walker.walk(translator, context);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
