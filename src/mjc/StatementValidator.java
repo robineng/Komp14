@@ -87,9 +87,8 @@ public class StatementValidator extends javagrammarBaseListener{
     }
 
     public String getTypeFromExp(javagrammarParser.ExpContext exp){
-        return "int";
         //Basic values
-        /*if(exp.INT_LIT() != null){
+        if(exp.INT_LIT() != null){
             int intLit = Integer.parseInt(exp.INT_LIT().getText());
             if(intLit > Integer.MAX_VALUE){
                 System.err.println("integer value out of bounds on line: " + exp.INT_LIT().getSymbol().getLine());
@@ -235,7 +234,6 @@ public class StatementValidator extends javagrammarBaseListener{
 
         //Bara ID kvar
         return getTypeFromId(exp.ID());
-        */
     }
 
     public boolean checkMethodParams(MethodSymbol method, javagrammarParser.ExplistContext eList){

@@ -17,6 +17,10 @@ import java.util.HashMap;
  */
 public class JVMMain {
     public static void main(String[] args) {
+        if(args.length == 0) {
+            System.err.println(String.format("Usage: java -cp mjc.jar mjc.JVMMain <filename.java>"));
+        }
+        System.err.println(String.format("Compiling %s...\n", args[0]));
         try {
             javagrammarLexer lexer = new javagrammarLexer(new ANTLRInputStream(new FileInputStream(args[0])));
             lexer.addErrorListener(new ANTLRErrorListener() {
