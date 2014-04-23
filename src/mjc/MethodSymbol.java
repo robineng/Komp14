@@ -25,7 +25,6 @@ public class MethodSymbol {
         if(this.vars.containsKey(id)){
             return false;
         }
-        sym.setInitiated(true);
         this.vars.put(id, sym);
         this.params.add(sym);
         return true;
