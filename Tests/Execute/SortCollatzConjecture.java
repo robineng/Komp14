@@ -151,6 +151,8 @@ class Sorter {
                     kek = sal.addAtIndex(sal.get(index+1), index);
                     kek = sal.addAtIndex(swap, index+1);
                     swapped = true;
+                } else {
+                    //Do nothing
                 }
                 index = index + 1;
             }
@@ -202,6 +204,8 @@ class SimpleArrayList {
             }
             array = temparray;
             maxSize = maxSize + maxSize;
+        } else {
+            //Do nothing
         }
         array[currSize] = toAdd;
         currSize = currSize + 1;
@@ -220,10 +224,12 @@ class SimpleArrayList {
      */
     public boolean addAtIndex(int toAdd, int index) {
         boolean toReturn;
-        if(!(index > maxSize-1)) {
+        if(!(maxsize-1 < index)) {
             if(currSize < index) {
                 currSize = currSize + 1;
                 index = currSize;
+            } else {
+                //Do nothing
             }
             array[index] = toAdd;
             toReturn = true;
@@ -316,10 +322,14 @@ class TestCases {
         if(sal1.getSize() < sal2.getSize()) {
             fail = true;
             toReturn = false;
+        } else {
+            //Do nothing
         }
         if(sal2.getSize() < sal1.getSize()) {
             fail = true;
             toReturn = false;
+        } else {
+            //Do nothing
         }
 
         if(!fail) {
@@ -328,12 +338,18 @@ class TestCases {
                 //Assert equal size of the ints in the arraylists
                 if(current < sal2.get(i)) {
                     toReturn = false;
+                } else {
+                    //Do nothing
                 }
                 if(sal2.get(i) < current) {
                     toReturn = false;
+                } else {
+                    //Do nothing
                 }
                 i = i + 1;
             }
+        } else {
+            //Do nothing
         }
         return toReturn;
     }
