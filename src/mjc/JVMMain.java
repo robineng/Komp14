@@ -23,6 +23,8 @@ public class JVMMain {
         System.err.println(String.format("Compiling %s...\n", args[0]));
         try {
             javagrammarLexer lexer = new javagrammarLexer(new ANTLRInputStream(new FileInputStream(args[0])));
+            System.out.println(lexer.getAllTokens().size());
+            lexer.reset();
             lexer.addErrorListener(new ANTLRErrorListener() {
                 @Override
                 public void syntaxError(@NotNull Recognizer<?, ?> recognizer, @Nullable Object o, int i, int i2, @NotNull String s, @Nullable RecognitionException e) {
