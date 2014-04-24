@@ -224,7 +224,7 @@ class SimpleArrayList {
      */
     public boolean addAtIndex(int toAdd, int index) {
         boolean toReturn;
-        if(!(maxsize-1 < index)) {
+        if(!(maxSize-1 < index)) {
             if(currSize < index) {
                 currSize = currSize + 1;
                 index = currSize;
