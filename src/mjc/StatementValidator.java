@@ -72,7 +72,10 @@ public class StatementValidator extends javagrammarBaseListener{
             }else{
                 VariableSymbol arr = getVarFromId(ctx.ID());
                 String expType = getTypeFromExp(ctx.exp(1));
-                if(!expType.equals(arr.getArrayElementType())){
+                if(!(arr.getArrayElementType().equals("long") && expType.matches("int|long") ||
+                        (arr.getArrayElementType().equals("int") && expType.equals("int")))) {
+                    System.err.println(arr.getArrayElementType());
+                    System.out.println(expType);
                     System.err.println("Can not assign " + expType + " to " + arr.getArrayElementType() + " array on line: " + ctx.ASSIGNMENT().getSymbol().getLine());
                     System.exit(1);
                 }
