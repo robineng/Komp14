@@ -7,6 +7,9 @@ import java.util.HashMap;
  */
 public class ClassSymbol {
     private String id;
+
+
+
     private HashMap<String, VariableSymbol> variables;
     private HashMap<String, MethodSymbol> methods;
 
@@ -50,5 +53,13 @@ public class ClassSymbol {
 
     public String getId(){
         return this.id;
+    }
+
+    public HashMap<String, VariableSymbol> getVariables() {
+        return variables;
+    }
+
+    public HashMap<String, MethodSymbol> getMethods() {
+        return methods;
     }
 }
