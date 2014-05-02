@@ -2,6 +2,7 @@
 bin/
 dist/
 docs/
+gen/
 *~
 .idea/
 .idea/workspace.xml

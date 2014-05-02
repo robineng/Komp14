@@ -10,17 +10,19 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
 
     //Used to keep track of difference between class variables and
     //variables that are only available within a method
-    private HashMap <String, String> classVariables;
-    private  HashMap<String, String> methodVariables;
+    private HashMap<String, String> classVariables;
+    private HashMap<String, String> methodVariables;
     private javagrammarParser.MainclassContext mainclass;
     private HashMap<String, javagrammarParser.ClassdeclContext> classes;
     private javagrammarParser.ClassdeclContext currClass = null;
+    private HashMap<String, HashMap<String, javagrammarParser.FormallistContext>> classMethods;
 
     public javagrammarSymbolListener(){
         super();
         classes = new HashMap<String, javagrammarParser.ClassdeclContext>();
         classVariables = new HashMap<String, String>();
         methodVariables = new HashMap<String, String>();
+        classMethods = new HashMap<String, HashMap<String, javagrammarParser.FormallistContext>>();
     }
 
 
@@ -29,6 +31,7 @@ public class javagrammarSymbolListener extends javagrammarBaseListener{
         for(javagrammarParser.ClassdeclContext currclass : ctx.classdecl()) {
             if(!classes.containsKey(currclass.ID().getText()) && !mainclass.ID(0).getText().equals(currclass.ID().getText())) {
                 classes.put(currclass.ID().getText(), currclass);
+                classMethods.put(currclass.ID().getText(), new HashMap<String, javagrammarParser.FormallistContext>());
             } else {
                 System.err.println("Class  :" + currclass.ID().getText() + " already defined");
                 System.exit(1);

@@ -11,10 +11,10 @@ options
 
 //LEXER RULES!
 //Skip whitespace
-WS : [ \t\r\n]+ -> skip;
-COMMENT1 : '//'.*?[\n] -> skip;
+WS : [ \t\r\n\u000c]+ -> skip;
+LINE_COMMENT: '//' ~('\n'|'\r')* ('\r\n' | '\r' | '\n') { skip(); } | '//' ~('\n'|'\r')* { skip();};
 COMMENT2 : '/*'.*?'*/' -> skip;
-COMMENT3 : '/**'.*?'**/' -> skip;
+//COMMENT3 : '/**'.*?'**/' -> skip;
 //Reserved words
 CLASS : 'class';
 PUBLIC : 'public';
@@ -68,7 +68,7 @@ LONG_LIT : '0'('l'|'L') | ('1'..'9')('0'..'9')*('l'|'L');
 ID : ('a'..'z'|'A'..'Z'|'_')('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
 
 //Parser rules!
-program : mainclass (classdecl)*;
+program : mainclass (classdecl)* EOF;
 mainclass : CLASS ID LEFTBRACE PUBLIC STATIC VOID {_input.LT(1).getText().matches("main")}? ID LEFTPAREN STRING
             LEFTBRACKET RIGHTBRACKET ID RIGHTPAREN LEFTBRACE (vardecl)* (stmt)* RIGHTBRACE RIGHTBRACE;
 
