@@ -56,9 +56,21 @@ public class SymbolRecorder extends javagrammarBaseListener{
     @Override public void enterMethoddecl(@NotNull javagrammarParser.MethoddeclContext ctx) {
         MethodSymbol meth = new MethodSymbol(ctx.type().getText());
         if(ctx.formallist().ID() != null){
+            if(ctx.formallist().type().ID() != null){
+                if(!classes.containsKey(ctx.formallist().type().getText())){
+                    System.err.println("Undefined classname " + ctx.formallist().type().getText() + " on line " + ctx.formallist().ID().getSymbol().getLine());
+                    System.exit(1);
+                }
+            }
             VariableSymbol var = new VariableSymbol(ctx.formallist().type().getText());
             meth.addParam(ctx.formallist().ID().getText(), var);
             for(javagrammarParser.FormalrestContext frest : ctx.formallist().formalrest()){
+                if(ctx.formallist().type().ID() != null){
+                    if(!classes.containsKey(ctx.formallist().type().getText())){
+                        System.err.println("Undefined classname " + ctx.formallist().type().getText() + " on line " + ctx.formallist().ID().getSymbol().getLine());
+                        System.exit(1);
+                    }
+                }
                 var = new VariableSymbol(frest.type().getText());
                 if(!meth.addParam(frest.ID().getText(), var)){
                     System.err.println("Param id already exists on line: " + ctx.ID().getSymbol().getLine());
