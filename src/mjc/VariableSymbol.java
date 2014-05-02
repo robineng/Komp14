@@ -18,6 +18,10 @@ public class VariableSymbol {
         this.type = type;
     }
 
+    public boolean isArray() {
+        return this.type.contains("[]");
+    }
+
     public String getArrayElementType(){
         return this.type.split("\\[")[0];
     }

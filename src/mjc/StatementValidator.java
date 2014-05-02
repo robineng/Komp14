@@ -71,7 +71,7 @@ public class StatementValidator extends javagrammarBaseListener{
                 }
             }else{
                 VariableSymbol arr = getVarFromId(ctx.ID());
-                if(!arr.getArrayElementType().matches("int\\[]|long\\[]")) {
+                if(!arr.isArray()) {
                     System.err.println(String.format("%s is not of array type!", ctx.ID()));
                     System.exit(1);
                 }
