@@ -194,10 +194,12 @@ public class StatementValidator extends javagrammarBaseListener{
             return "boolean";
         }
         if(exp.PLUS() != null || exp.MINUS() != null || exp.MULT() != null){
-            if(!getTypeFromExp(exp.exp(0)).matches("int|long") || !getTypeFromExp(exp.exp(1)).matches("int|long")) {
+            String first = getTypeFromExp(exp.exp(0));
+            String second = getTypeFromExp(exp.exp(1));
+            if(!first.matches("int|long") || !second.matches("int|long")) {
                 System.err.println("Both sides must be numbers: " +  exp.getText());
                 System.exit(1);
-            } if(getTypeFromExp(exp.exp(0)).equals("long") || getTypeFromExp(exp.exp(1)).equals("long")){
+            } if(first.equals("long") || second.equals("long")){
                 return "long";
             } else{
                 return "int";
