@@ -11,7 +11,7 @@ options
 
 //LEXER RULES!
 //Skip whitespace
-WS : [ \t\r\n]+ -> skip;
+WS : [ \t\r\n\u000c]+ -> skip;
 LINE_COMMENT: '//' ~('\n'|'\r')* ('\r\n' | '\r' | '\n') { skip(); } | '//' ~('\n'|'\r')* { skip();};
 COMMENT2 : '/*'.*?'*/' -> skip;
 //COMMENT3 : '/**'.*?'**/' -> skip;

@@ -1,4 +1,4 @@
-// Generated from javagrammar.g4 by ANTLR 4.2
+// Generated from /home/robin/Komp14/javagrammar.g4 by ANTLR 4.x
 
     package mjc;
 
@@ -84,6 +84,11 @@ public class javagrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof javagrammarListener ) ((javagrammarListener)listener).exitProgram(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof javagrammarVisitor ) return ((javagrammarVisitor<? extends T>)visitor).visitProgram(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ProgramContext program() throws RecognitionException {
@@ -167,6 +172,11 @@ public class javagrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof javagrammarListener ) ((javagrammarListener)listener).exitMainclass(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof javagrammarVisitor ) return ((javagrammarVisitor<? extends T>)visitor).visitMainclass(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final MainclassContext mainclass() throws RecognitionException {
@@ -196,7 +206,7 @@ public class javagrammarParser extends Parser {
 			setState(51);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,1,_ctx);
-			while ( _alt!=2 && _alt!=-1 ) {
+			while ( _alt!=2 && _alt!=ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					{
 					{
@@ -264,6 +274,11 @@ public class javagrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof javagrammarListener ) ((javagrammarListener)listener).exitClassdecl(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof javagrammarVisitor ) return ((javagrammarVisitor<? extends T>)visitor).visitClassdecl(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -335,6 +350,11 @@ public class javagrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof javagrammarListener ) ((javagrammarListener)listener).exitVardecl(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof javagrammarVisitor ) return ((javagrammarVisitor<? extends T>)visitor).visitVardecl(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final VardeclContext vardecl() throws RecognitionException {
@@ -401,6 +421,11 @@ public class javagrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof javagrammarListener ) ((javagrammarListener)listener).exitMethoddecl(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof javagrammarVisitor ) return ((javagrammarVisitor<? extends T>)visitor).visitMethoddecl(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final MethoddeclContext methoddecl() throws RecognitionException {
@@ -421,7 +446,7 @@ public class javagrammarParser extends Parser {
 			setState(94);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,5,_ctx);
-			while ( _alt!=2 && _alt!=-1 ) {
+			while ( _alt!=2 && _alt!=ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					{
 					{
@@ -486,6 +511,11 @@ public class javagrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof javagrammarListener ) ((javagrammarListener)listener).exitFormallist(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof javagrammarVisitor ) return ((javagrammarVisitor<? extends T>)visitor).visitFormallist(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final FormallistContext formallist() throws RecognitionException {
@@ -548,6 +578,11 @@ public class javagrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof javagrammarListener ) ((javagrammarListener)listener).exitFormalrest(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof javagrammarVisitor ) return ((javagrammarVisitor<? extends T>)visitor).visitFormalrest(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final FormalrestContext formalrest() throws RecognitionException {
@@ -590,6 +625,11 @@ public class javagrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof javagrammarListener ) ((javagrammarListener)listener).exitType(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof javagrammarVisitor ) return ((javagrammarVisitor<? extends T>)visitor).visitType(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -694,6 +734,11 @@ public class javagrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof javagrammarListener ) ((javagrammarListener)listener).exitStmt(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof javagrammarVisitor ) return ((javagrammarVisitor<? extends T>)visitor).visitStmt(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -851,6 +896,11 @@ public class javagrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof javagrammarListener ) ((javagrammarListener)listener).exitExp(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof javagrammarVisitor ) return ((javagrammarVisitor<? extends T>)visitor).visitExp(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ExpContext exp() throws RecognitionException {
@@ -955,7 +1005,7 @@ public class javagrammarParser extends Parser {
 			setState(244);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,15,_ctx);
-			while ( _alt!=2 && _alt!=-1 ) {
+			while ( _alt!=2 && _alt!=ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
@@ -1121,6 +1171,11 @@ public class javagrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof javagrammarListener ) ((javagrammarListener)listener).exitExplist(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof javagrammarVisitor ) return ((javagrammarVisitor<? extends T>)visitor).visitExplist(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ExplistContext explist() throws RecognitionException {
@@ -1180,6 +1235,11 @@ public class javagrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof javagrammarListener ) ((javagrammarListener)listener).exitExprest(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof javagrammarVisitor ) return ((javagrammarVisitor<? extends T>)visitor).visitExprest(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 

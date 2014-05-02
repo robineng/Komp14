@@ -1,4 +1,4 @@
-// Generated from javagrammar.g4 by ANTLR 4.2
+// Generated from /home/robin/Komp14/javagrammar.g4 by ANTLR 4.x
 
     package mjc;
 
