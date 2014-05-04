@@ -14,27 +14,31 @@ public class JasminTranslator extends javagrammarBaseListener {
     private File currClassFile;
     private PrintWriter filePrinter;
     private HashMap<String, ClassSymbol> classes;
-    private HashMap<String, VariableSymbol> currFields;
-    private HashMap<String, MethodSymbol> currMethods;
     private ClassSymbol currClass;
     private MethodSymbol currMethod;
-    private HashMap <String, String> primitiveTypes;
+    private HashMap <String, String> typeDescriptors;
+    private HashMap <String, String> typeMnemonic;
 
     public JasminTranslator(HashMap<String, ClassSymbol> classes) {
         super();
         this.classes = classes;
-        primitiveTypes = new HashMap<String, String>();
-        primitiveTypes.put("int", "I");
-        primitiveTypes.put("long", "L");
-        primitiveTypes.put("boolean", "B");
-        primitiveTypes.put("int[]", "[I");
-        primitiveTypes.put("long[]", "[L");
+        typeDescriptors = new HashMap<String, String>();
+        typeDescriptors.put("int", "I");
+        typeDescriptors.put("long", "J");
+        typeDescriptors.put("boolean", "Z");
+        typeDescriptors.put("int[]", "[I");
+        typeDescriptors.put("long[]", "[J");
+        typeMnemonic = new HashMap<String, String>();
+        typeMnemonic.put("I", "i");
+        typeMnemonic.put("J", "l");
+        typeMnemonic.put("Z", "i");
+
     }
 
     @Override public void enterMainclass(javagrammarParser.MainclassContext ctx) {
         this.currClass = this.classes.get(ctx.ID(0).getText());
         this.currMethod = this.currClass.getMethod("main");
-        //localvars = new HashMap<String,Integer>();
+
         currClassFile = new File(ctx.ID(0).getText() + ".j");
         try {
             filePrinter = new PrintWriter(currClassFile);
@@ -52,10 +56,10 @@ public class JasminTranslator extends javagrammarBaseListener {
         filePrinter.append(String.format(".end method\n\n"));
         filePrinter.append(String.format(".method public static main([Ljava/lang/String;)V\n"));
         //+1 because args is the only argument
-        filePrinter.append(String.format(".limit locals %d\n", ctx.vardecl().size()+1));
+        filePrinter.append(String.format(".limit locals %d\n", currMethod.getVars().size() + currMethod.getParams().size() + 1));
+        //TODO Better way of finding stack limit
+        filePrinter.append(String.format(".limit stack %d\n", 10));
 
-        currFields = classes.get(ctx.ID(0)).getVariables();
-        currMethods = classes.get(ctx.ID(0)).getMethods();
     }
 
     @Override public void exitMainclass(javagrammarParser.MainclassContext ctx) {
@@ -97,48 +101,94 @@ public class JasminTranslator extends javagrammarBaseListener {
         filePrinter.append(String.format(".method public %s(", ctx.ID().getText()));
         VariableSymbol[] params = (VariableSymbol[]) currMethod.getParams().toArray();
         for(VariableSymbol var : params){
-            if(primitiveTypes.containsKey(var.getType())){
+            if(typeDescriptors.containsKey(var.getType())){
                 //If it's a primitive type
-                filePrinter.append(primitiveTypes.get(var.getType()));
+                filePrinter.append(typeDescriptors.get(var.getType()));
             } else {
                 //If it's an other class
                 filePrinter.append(String.format("L%s;", var.getType()));
             }
         }
-        if(primitiveTypes.containsKey(ctx.type().getText())){
-            filePrinter.append(String.format(")%s\n", primitiveTypes.get(ctx.type().getText())));
+        if(typeDescriptors.containsKey(ctx.type().getText())){
+            filePrinter.append(String.format(")%s\n", typeDescriptors.get(ctx.type().getText())));
         }else{
             filePrinter.append(String.format(")L%s;\n", ctx.type().getText()));
         }
-        filePrinter.append(String.format(".limit locals %d\n", currMethod.getVars().size()+1));
-        //TODO Vad ska vi returnera?
-        filePrinter.append("return\n");
-        filePrinter.append(".end method\n");
-
-
+        filePrinter.append(String.format(".limit locals %d\n", currMethod.getVars().size() + currMethod.getParams().size() + 1));
+        //This seems to be needed
+        //TODO Better way of finding stack limit
+        filePrinter.append(String.format(".limit stack %d\n", 10));
     }
 
     @Override public void exitMethoddecl(javagrammarParser.MethoddeclContext ctx) {
+        evaluateExp(ctx.exp());
+        filePrinter.append("return\n");
+        filePrinter.append(".end method\n");
         this.currMethod = null;
     }
 
+    /*
+    Här händer snart en jävla massa grejer.
+     */
     @Override public void enterStmt(javagrammarParser.StmtContext ctx) {
         if(ctx.ASSIGNMENT() != null) {
+            //TODO En grej
+        }
+        if(ctx.SYSO() != null){
+            filePrinter.append("getstatic java/lang/System/out Ljava/io/PrintStream;\n");
+            String type = evaluateExp(ctx.exp(0));
+            filePrinter.append(String.format("invokevirtual java/io/PrintStream/println(%s)V\n", type));
 
         }
     }
 
-    public int evaluateExp(javagrammarParser.ExpContext exp){
+    /*
+     * Förslag:
+     * Alla exps är i slutändan ett enda värde (antingen en primitiv typ eller en pekare)
+     * denna metod appendar jasminkod för att räkna ut expen och sedan lägger värdet överst
+     * i stacken. Det är sedan upp till Stmt att bestämma vad som ska göras med den.
+     *
+     * Vi returnerar en string med typen av expen för att det är information som kan behövas
+     * vid val av instruktion.
+     *
+     */
+    public String evaluateExp(javagrammarParser.ExpContext exp){
+        if(exp.INT_LIT() !=  null){
+            filePrinter.append(String.format("ldc %s\n", exp.INT_LIT().getText()));
+            return "I";
+        }
+        if(exp.LONG_LIT() != null){
+            //ldc2_w är för att ladda category 2 konstanter (double och long)
+            filePrinter.append(String.format("ldc2_w %s\n", exp.LONG_LIT().getText().split("L|l")[0]));
+            return "J";
+        }
+        if(exp.TRUE() != null){
+            filePrinter.append("ldc 1\n");
+            return "Z";
+        }
+        if(exp.FALSE() != null){
+            filePrinter.append("ldc 0\n");
+            return "Z";
+        }
         if(exp.PLUS() != null){
-            if(exp.exp(0).INT_LIT() != null) {
-                filePrinter.append(String.format("ipush %s\n", exp.exp(0).INT_LIT().getText()));
-                filePrinter.append(String.format("iload %d\n", evaluateExp(exp.exp(1))));
-                filePrinter.append(String.format("iadd\n"));
-                filePrinter.append(String.format("istore %d\n")); //TODO: Add number to return here
-                return 0; //Return said number!
-                //add to local variable
-                //Return local variable number
+            String type1 = evaluateExp(exp.exp(0));
+            String type2 = evaluateExp(exp.exp(1));
+            if(type1.equals("J") || type2.equals("J")){
+                if(type2.equals("I")){
+                    filePrinter.append("i2l\n");
+                } else if(type1.equals("I")){
+                    //swap = byt plats på första och andra värdet på stacken
+                    filePrinter.append("swap\n");
+                    filePrinter.append("i2l\n");
+                }
+                filePrinter.append("ladd\n");
+                return "J";
+            }else{
+                filePrinter.append("iadd\n");
+                return "I";
             }
         }
+        return null;
+
     }
 }
