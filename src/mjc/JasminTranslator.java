@@ -35,6 +35,13 @@ public class JasminTranslator extends javagrammarBaseListener {
 
     }
 
+    private String getTypeDescriptor(String type){
+        if(typeDescriptors.containsKey(type)){
+            return typeDescriptors.get(type);
+        }
+        return String.format("L%s;", type);
+    }
+
     @Override public void enterMainclass(javagrammarParser.MainclassContext ctx) {
         this.currClass = this.classes.get(ctx.ID(0).getText());
         this.currMethod = this.currClass.getMethod("main");
@@ -95,6 +102,19 @@ public class JasminTranslator extends javagrammarBaseListener {
         filePrinter.flush();
         filePrinter.close();
         this.currClass = null;
+    }
+
+    @Override public void enterVardecl(javagrammarParser.VardeclContext ctx) {
+        if(currMethod == null) {
+            VariableSymbol field = currClass.getVar(ctx.ID().getText());
+            filePrinter.append(String.format(".field public %s %s\n", ctx.ID().getText(), getTypeDescriptor(field.getType())));
+        } else{
+            VariableSymbol var = currMethod.getVar(ctx.ID().getText());
+            if(var.getType().equals("long")){
+                filePrinter.append("ldc2_w 0");
+                filePrinter.append(String.format("lstore %d", currMethod.getVarLocal(ctx.ID().getText())));
+            }
+        }
     }
 
     @Override public void enterMethoddecl(javagrammarParser.MethoddeclContext ctx) {

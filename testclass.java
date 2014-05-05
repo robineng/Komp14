@@ -1,6 +1,8 @@
 //Måste heta testclass om jtest ska fungera
 class testclass {
     public static void main(String[] args) {
+        int kek;
+        System.out.println(kek);
         System.out.println(1  + 2L);
         System.out.println(2L + 1 );
         System.out.println(1L + 2L);
