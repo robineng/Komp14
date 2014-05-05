@@ -58,6 +58,7 @@ public class JasminTranslator extends javagrammarBaseListener {
         //+1 because args is the only argument
         filePrinter.append(String.format(".limit locals %d\n", currMethod.getVars().size() + currMethod.getParams().size() + 1));
         //TODO Better way of finding stack limit
+        //Must we limit the stack size at all?
         filePrinter.append(String.format(".limit stack %d\n", 10));
 
     }
@@ -105,7 +106,7 @@ public class JasminTranslator extends javagrammarBaseListener {
                 //If it's a primitive type
                 filePrinter.append(typeDescriptors.get(var.getType()));
             } else {
-                //If it's an other class
+                //If it's another class
                 filePrinter.append(String.format("L%s;", var.getType()));
             }
         }
@@ -138,7 +139,6 @@ public class JasminTranslator extends javagrammarBaseListener {
             filePrinter.append("getstatic java/lang/System/out Ljava/io/PrintStream;\n");
             String type = evaluateExp(ctx.exp(0));
             filePrinter.append(String.format("invokevirtual java/io/PrintStream/println(%s)V\n", type));
-
         }
     }
 
@@ -151,44 +151,85 @@ public class JasminTranslator extends javagrammarBaseListener {
      * Vi returnerar en string med typen av expen för att det är information som kan behövas
      * vid val av instruktion.
      *
+     * Det var typ det jag tänkt. Låter asbra
      */
     public String evaluateExp(javagrammarParser.ExpContext exp){
         if(exp.INT_LIT() !=  null){
             filePrinter.append(String.format("ldc %s\n", exp.INT_LIT().getText()));
-            return "I";
+            return typeDescriptors.get("int");
         }
         if(exp.LONG_LIT() != null){
             //ldc2_w är för att ladda category 2 konstanter (double och long)
             filePrinter.append(String.format("ldc2_w %s\n", exp.LONG_LIT().getText().split("L|l")[0]));
-            return "J";
+            return typeDescriptors.get("long");
         }
         if(exp.TRUE() != null){
             filePrinter.append("ldc 1\n");
-            return "Z";
+            return typeDescriptors.get("boolean");
         }
         if(exp.FALSE() != null){
             filePrinter.append("ldc 0\n");
-            return "Z";
+            return typeDescriptors.get("boolean");
         }
         if(exp.PLUS() != null){
             String type1 = evaluateExp(exp.exp(0));
             String type2 = evaluateExp(exp.exp(1));
-            if(type1.equals("J") || type2.equals("J")){
-                if(type2.equals("I")){
+            if(type1.equals(typeDescriptors.get("long")) || type2.equals(typeDescriptors.get("long"))){
+                if(type2.equals(typeDescriptors.get("int"))){
                     filePrinter.append("i2l\n");
-                } else if(type1.equals("I")){
+                } else if(type1.equals(typeDescriptors.get("int"))){
                     //swap = byt plats på första och andra värdet på stacken
-                    filePrinter.append("swap\n");
+                    filePrinter.append("dup2_x1\n");
+                    filePrinter.append("pop2\n");
                     filePrinter.append("i2l\n");
                 }
                 filePrinter.append("ladd\n");
-                return "J";
+                return typeDescriptors.get("long");
             }else{
                 filePrinter.append("iadd\n");
-                return "I";
+                return typeDescriptors.get("int");
+            }
+        }
+        if(exp.MULT() != null) {
+            String type1 = evaluateExp(exp.exp(0));
+            String type2 = evaluateExp(exp.exp(1));
+            if(type1.equals(typeDescriptors.get("long")) || type2.equals(typeDescriptors.get("long"))) {
+                if(type2.equals(typeDescriptors.get("int"))) {
+                    filePrinter.append("i2l\n");
+                } else if(type1.equals(typeDescriptors.get("int"))){
+                    filePrinter.append("dup2_x1\n");
+                    filePrinter.append("pop2\n");
+                    filePrinter.append("i2l\n");
+                }
+                filePrinter.append("lmul\n");
+                return typeDescriptors.get("long");
+            } else {
+                filePrinter.append("imul\n");
+                return typeDescriptors.get("int");
+            }
+        }
+
+        if(exp.MINUS() != null) {
+            String type1 = evaluateExp(exp.exp(0));
+            String type2 = evaluateExp(exp.exp(1));
+            if(type1.equals(typeDescriptors.get("long")) || type2.equals(typeDescriptors.get("long"))) {
+                if(type2.equals(typeDescriptors.get("int"))) {
+                    filePrinter.append("i2l\n");
+                } else if(type1.equals(typeDescriptors.get("int"))) {
+                    filePrinter.append("dup2_x1\n");
+                    filePrinter.append("pop2\n");
+                    filePrinter.append("i2l\n");
+                    filePrinter.append("dup2_x2\n");
+                    filePrinter.append("pop2\n");
+                }
+                filePrinter.append("lsub\n");
+                return typeDescriptors.get("long");
+            }
+            else {
+                filePrinter.append("isub\n");
+                return typeDescriptors.get("int");
             }
         }
         return null;
-
     }
 }
