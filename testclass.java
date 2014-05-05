@@ -2,9 +2,11 @@
 class testclass {
     public static void main(String[] args) {
         long kek;
-        int kek2;
+        boolean kek2;
+        Frick kek3;
 
         System.out.println(kek);
+        System.out.println(kek2);
 
         System.out.println(1  + 2L);
         System.out.println(2L + 1 );
@@ -25,4 +27,8 @@ class testclass {
         System.out.println(5L - 2 );
         System.out.println(5L - 2L);
     }
+}
+
+class Frick{
+
 }

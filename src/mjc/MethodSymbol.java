@@ -27,6 +27,10 @@ public class MethodSymbol {
         localCounter = 0;
     }
 
+    public int getLocalCounter(){
+        return this.localCounter;
+    }
+
     public boolean addParam(String id, VariableSymbol sym){
         if(this.vars.containsKey(id)){
             return false;
@@ -34,6 +38,9 @@ public class MethodSymbol {
         this.vars.put(id, sym);
         this.params.add(sym);
         this.varsLocal.put(id, this.localCounter);
+        if(sym.getType().equals("long")){
+            this.localCounter++;
+        }
         this.localCounter++;
         return true;
     }
@@ -44,6 +51,9 @@ public class MethodSymbol {
         }
         this.vars.put(id, sym);
         this.varsLocal.put(id, this.localCounter);
+        if(sym.getType().equals("long")){
+            this.localCounter++;
+        }
         this.localCounter++;
         return true;
     }

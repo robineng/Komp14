@@ -42,6 +42,15 @@ public class JasminTranslator extends javagrammarBaseListener {
         return String.format("L%s;", type);
     }
 
+    private String getTypeMnemonic (String type) {
+        if(typeMnemonic.containsKey(type)) {
+            return typeMnemonic.get(type);
+        }
+        else {
+            return String.format("a");
+        }
+    }
+
     @Override public void enterMainclass(javagrammarParser.MainclassContext ctx) {
         this.currClass = this.classes.get(ctx.ID(0).getText());
         this.currMethod = this.currClass.getMethod("main");
@@ -63,7 +72,7 @@ public class JasminTranslator extends javagrammarBaseListener {
         filePrinter.append(String.format(".end method\n\n"));
         filePrinter.append(String.format(".method public static main([Ljava/lang/String;)V\n"));
         //+1 because args is the only argument
-        filePrinter.append(String.format(".limit locals %d\n", currMethod.getVars().size() + currMethod.getParams().size() + 1));
+        filePrinter.append(String.format(".limit locals %d\n", currMethod.getLocalCounter()));
         //TODO Better way of finding stack limit
         //Must we limit the stack size at all?
         filePrinter.append(String.format(".limit stack %d\n", 10));
@@ -116,6 +125,9 @@ public class JasminTranslator extends javagrammarBaseListener {
             } else if(var.getType().matches("int|boolean")) {
                 filePrinter.append("ldc 0\n");
                 filePrinter.append(String.format("istore %d\n", currMethod.getVarLocal(ctx.ID().getText())));
+            } else {
+                filePrinter.append("aconst_null\n");
+                filePrinter.append(String.format("astore %d\n", currMethod.getVarLocal(ctx.ID().getText())));
             }
         }
     }
@@ -138,7 +150,7 @@ public class JasminTranslator extends javagrammarBaseListener {
         }else{
             filePrinter.append(String.format(")L%s;\n", ctx.type().getText()));
         }
-        filePrinter.append(String.format(".limit locals %d\n", currMethod.getVars().size() + currMethod.getParams().size() + 1));
+        filePrinter.append(String.format(".limit locals %d\n", currMethod.getLocalCounter()));
         //This seems to be needed
         //TODO Better way of finding stack limit
         filePrinter.append(String.format(".limit stack %d\n", 10));
@@ -156,7 +168,16 @@ public class JasminTranslator extends javagrammarBaseListener {
      */
     @Override public void enterStmt(javagrammarParser.StmtContext ctx) {
         if(ctx.ASSIGNMENT() != null) {
-            //TODO En grej
+            if(ctx.LEFTBRACKET() == null){
+                if(currMethod.varExists(ctx.ID().getText())) {
+                    String prefix = getTypeDescriptor(currMethod.getVar(ctx.ID().getText()).getType());
+                } else {
+                    evaluateExp(ctx.exp(0));
+                    String type = getTypeDescriptor(currClass.getVar(ctx.ID().getText()).getType());
+                    filePrinter.append(String.format("putfield %s/%s; %s\n", currClass.getId(), ctx.ID().getText(), type));
+                }
+
+            }
         }
         if(ctx.SYSO() != null){
             filePrinter.append("getstatic java/lang/System/out Ljava/io/PrintStream;\n");
@@ -257,9 +278,13 @@ public class JasminTranslator extends javagrammarBaseListener {
         if(exp.ID() != null){
             if(currMethod.varExists(exp.ID().getText())){
                 String type = currMethod.getVar(exp.ID().getText()).getType();
-                String prefix = typeMnemonic.get(typeDescriptors.get(type));
+                String prefix = getTypeMnemonic(typeDescriptors.get(type)) ;
                 int local = currMethod.getVarLocal(exp.ID().getText());
                 filePrinter.append(String.format("%sload %d\n", prefix, local));
+                return getTypeDescriptor(type);
+            } else {
+                String type = currClass.getVar(exp.ID().getText()).getType();
+                filePrinter.append(String.format("getfield %s/%s %s\n", currClass.getId(), exp.ID().getText(), getTypeDescriptor(type)));
                 return getTypeDescriptor(type);
             }
         }
