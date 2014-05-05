@@ -111,8 +111,11 @@ public class JasminTranslator extends javagrammarBaseListener {
         } else{
             VariableSymbol var = currMethod.getVar(ctx.ID().getText());
             if(var.getType().equals("long")){
-                filePrinter.append("ldc2_w 0");
-                filePrinter.append(String.format("lstore %d", currMethod.getVarLocal(ctx.ID().getText())));
+                filePrinter.append("lconst_0\n");
+                filePrinter.append(String.format("lstore %d\n", currMethod.getVarLocal(ctx.ID().getText())));
+            } else if(var.getType().matches("int|boolean")) {
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("istore %d\n", currMethod.getVarLocal(ctx.ID().getText())));
             }
         }
     }
@@ -257,6 +260,7 @@ public class JasminTranslator extends javagrammarBaseListener {
                 String prefix = typeMnemonic.get(typeDescriptors.get(type));
                 int local = currMethod.getVarLocal(exp.ID().getText());
                 filePrinter.append(String.format("%sload %d\n", prefix, local));
+                return getTypeDescriptor(type);
             }
         }
         return null;
