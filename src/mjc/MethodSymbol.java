@@ -49,7 +49,7 @@ public class MethodSymbol {
     }
 
     public int getVarLocal(String var){
-        if(this.varsLocal.containsKey(var)){
+        if(!this.varsLocal.containsKey(var)){
             return -1;
         }
         return this.varsLocal.get(var);

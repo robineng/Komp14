@@ -230,6 +230,15 @@ public class JasminTranslator extends javagrammarBaseListener {
                 return typeDescriptors.get("int");
             }
         }
+
+        if(exp.ID() != null){
+            if(currMethod.varExists(exp.ID().getText())){
+                String type = currMethod.getVar(exp.ID().getText()).getType();
+                String prefix = typeMnemonic.get(typeDescriptors.get(type));
+                int local = currMethod.getVarLocal(exp.ID().getText());
+                filePrinter.append(String.format("%sload %d\n", prefix, local));
+            }
+        }
         return null;
     }
 }
