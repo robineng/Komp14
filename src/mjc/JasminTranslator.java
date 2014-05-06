@@ -19,6 +19,7 @@ public class JasminTranslator extends javagrammarBaseListener {
     private MethodSymbol currMethod;
     private HashMap <String, String> typeDescriptors;
     private HashMap <String, String> typeMnemonic;
+    private int labelCount;
 
     public JasminTranslator(HashMap<String, ClassSymbol> classes) {
         super();
@@ -33,6 +34,7 @@ public class JasminTranslator extends javagrammarBaseListener {
         typeMnemonic.put("I", "i");
         typeMnemonic.put("J", "l");
         typeMnemonic.put("Z", "i");
+        labelCount = 0;
 
     }
 
@@ -162,15 +164,21 @@ public class JasminTranslator extends javagrammarBaseListener {
         if(ctx.ASSIGNMENT() != null) {
             if(ctx.LEFTBRACKET() == null){
                 if(currMethod.varExists(ctx.ID().getText())) {
-                    evaluateExp(ctx.exp(0));
+                    String type = evaluateExp(ctx.exp(0));
                     String prefix = getTypeMnemonic(getTypeDescriptor(currMethod.getVar(ctx.ID().getText()).getType()));
+                    if(type.equals("I") && prefix.equals("l")){
+                        filePrinter.append("i2l\n");
+                    }
                     int local = currMethod.getVarLocal(ctx.ID().getText());
                     filePrinter.append(String.format("%sstore %d\n", prefix, local));
                 } else {
                     //"this"
                     filePrinter.append(String.format("aload 0\n"));
-                    evaluateExp(ctx.exp(0));
+                    String val = evaluateExp(ctx.exp(0));
                     String type = getTypeDescriptor(currClass.getVar(ctx.ID().getText()).getType());
+                    if(val.equals("I") && type.equals("J")){
+                        filePrinter.append("i2l\n");
+                    }
                     filePrinter.append(String.format("putfield %s/%s %s\n", currClass.getId(), ctx.ID().getText(), type));
                 }
 
@@ -179,13 +187,21 @@ public class JasminTranslator extends javagrammarBaseListener {
                     filePrinter.append(String.format("aload %d\n", currMethod.getVarLocal(ctx.ID().getText())));
                     evaluateExp(ctx.exp(0));
                     String type = evaluateExp(ctx.exp(1));
-                    filePrinter.append(String.format("%sastore\n", getTypeMnemonic(type)));
+                    String arrtype = getTypeDescriptor(currMethod.getVar(ctx.ID().getText()).getArrayElementType());
+                    if(type.equals("I") && arrtype.equals("J")){
+                        filePrinter.append("i2l\n");
+                    }
+                    filePrinter.append(String.format("%sastore\n", getTypeMnemonic(arrtype)));
                 } else {
                     String type = currClass.getVar(ctx.ID().getText()).getType();
                     filePrinter.append("aload 0\n");
                     filePrinter.append(String.format("getfield %s/%s %s\n", currClass.getId(), ctx.ID().getText(), getTypeDescriptor(type)));
                     evaluateExp(ctx.exp(0));
-                    String arrtype = evaluateExp(ctx.exp(1));
+                    String valtype = evaluateExp(ctx.exp(1));
+                    String arrtype = getTypeDescriptor(currClass.getVar(ctx.ID().getText()).getArrayElementType());
+                    if(valtype.equals("I") && arrtype.equals("J")){
+                        filePrinter.append("i2l\n");
+                    }
                     filePrinter.append(String.format("%sastore\n", getTypeMnemonic(arrtype)));
                 }
             }
@@ -298,8 +314,233 @@ public class JasminTranslator extends javagrammarBaseListener {
             return "Z";
         }
         if(exp.EQ() != null){
-            
+            String type1 = evaluateExp(exp.exp(0));
+            String type2 = evaluateExp(exp.exp(1));
+            if(type1.equals("J") || type2.equals("J")){
+                if(type2.equals(typeDescriptors.get("int"))) {
+                    filePrinter.append("i2l\n");
+                } else if(type1.equals(typeDescriptors.get("int"))){
+                    filePrinter.append("dup2_x1\n");
+                    filePrinter.append("pop2\n");
+                    filePrinter.append("i2l\n");
+                }
+                filePrinter.append("lcmp\n");
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("if_icmpeq Label%d\n", this.labelCount));
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
+                filePrinter.append(String.format("Label%d:\n", this.labelCount));
+                filePrinter.append("ldc 1\n");
+                filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
+                this.labelCount += 2;
+                return "Z";
+            }
+            else if(type1.equals("I") && type2.equals("I") || type1.equals("Z") && type2.equals("Z")){
+                filePrinter.append(String.format("if_icmpeq Label%d\n", this.labelCount));
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
+                filePrinter.append(String.format("Label%d:\n", this.labelCount));
+                filePrinter.append("ldc 1\n");
+                filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
+                this.labelCount += 2;
+                return "Z";
+            } else {
+                //Har vi kommit hit så dealar vi med objektreferenser
+                filePrinter.append(String.format("if_acmpeq Label%d\n", this.labelCount));
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
+                filePrinter.append(String.format("Label%d:\n", this.labelCount));
+                filePrinter.append("ldc 1\n");
+                filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
+                this.labelCount += 2;
+                return "Z";
+            }
         }
+
+        if(exp.NEQ() != null){
+            String type1 = evaluateExp(exp.exp(0));
+            String type2 = evaluateExp(exp.exp(1));
+            if(type1.equals("J") || type2.equals("J")){
+                if(type2.equals(typeDescriptors.get("int"))) {
+                    filePrinter.append("i2l\n");
+                } else if(type1.equals(typeDescriptors.get("int"))){
+                    filePrinter.append("dup2_x1\n");
+                    filePrinter.append("pop2\n");
+                    filePrinter.append("i2l\n");
+                }
+                filePrinter.append("lcmp\n");
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("if_icmpne Label%d\n", this.labelCount));
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
+                filePrinter.append(String.format("Label%d:\n", this.labelCount));
+                filePrinter.append("ldc 1\n");
+                filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
+                this.labelCount += 2;
+                return "Z";
+            }
+            else if(type1.equals("I") && type2.equals("I") || type1.equals("Z") && type2.equals("Z")){
+                filePrinter.append(String.format("if_icmpne Label%d\n", this.labelCount));
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
+                filePrinter.append(String.format("Label%d:\n", this.labelCount));
+                filePrinter.append("ldc 1\n");
+                filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
+                this.labelCount += 2;
+                return "Z";
+            } else {
+                //Har vi kommit hit så dealar vi med objektreferenser
+                filePrinter.append(String.format("if_acmpne Label%d\n", this.labelCount));
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
+                filePrinter.append(String.format("Label%d:\n", this.labelCount));
+                filePrinter.append("ldc 1\n");
+                filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
+                this.labelCount += 2;
+                return "Z";
+            }
+        }
+
+        if(exp.LESSTHAN() != null){
+            String type1 = evaluateExp(exp.exp(0));
+            String type2 = evaluateExp(exp.exp(1));
+            if(type1.equals("J") || type2.equals("J")){
+                if(type2.equals(typeDescriptors.get("int"))) {
+                    filePrinter.append("i2l\n");
+                } else if(type1.equals(typeDescriptors.get("int"))){
+                    filePrinter.append("dup2_x1\n");
+                    filePrinter.append("pop2\n");
+                    filePrinter.append("i2l\n");
+                    filePrinter.append("dup2_x2\n");
+                    filePrinter.append("pop2\n");
+                }
+                filePrinter.append("lcmp\n");
+                filePrinter.append(String.format("iflt Label%d\n", this.labelCount));
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
+                filePrinter.append(String.format("Label%d:\n", this.labelCount));
+                filePrinter.append("ldc 1\n");
+                filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
+                this.labelCount += 2;
+                return "Z";
+            } else {
+                //Måste vara enbart ints
+                filePrinter.append(String.format("if_icmplt Label%d\n", this.labelCount));
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
+                filePrinter.append(String.format("Label%d:\n", this.labelCount));
+                filePrinter.append("ldc 1\n");
+                filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
+                this.labelCount += 2;
+                return "Z";
+            }
+        }
+
+        if(exp.MORETHAN() != null){
+            String type1 = evaluateExp(exp.exp(0));
+            String type2 = evaluateExp(exp.exp(1));
+            if(type1.equals("J") || type2.equals("J")){
+                if(type2.equals(typeDescriptors.get("int"))) {
+                    filePrinter.append("i2l\n");
+                } else if(type1.equals(typeDescriptors.get("int"))){
+                    filePrinter.append("dup2_x1\n");
+                    filePrinter.append("pop2\n");
+                    filePrinter.append("i2l\n");
+                    filePrinter.append("dup2_x2\n");
+                    filePrinter.append("pop2\n");
+                }
+                filePrinter.append("lcmp\n");
+                filePrinter.append(String.format("ifgt Label%d\n", this.labelCount));
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
+                filePrinter.append(String.format("Label%d:\n", this.labelCount));
+                filePrinter.append("ldc 1\n");
+                filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
+                this.labelCount += 2;
+                return "Z";
+            } else {
+                //Måste vara enbart ints
+                filePrinter.append(String.format("if_icmpgt Label%d\n", this.labelCount));
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
+                filePrinter.append(String.format("Label%d:\n", this.labelCount));
+                filePrinter.append("ldc 1\n");
+                filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
+                this.labelCount += 2;
+                return "Z";
+            }
+        }
+
+        if(exp.LEQ() != null){
+            String type1 = evaluateExp(exp.exp(0));
+            String type2 = evaluateExp(exp.exp(1));
+            if(type1.equals("J") || type2.equals("J")){
+                if(type2.equals(typeDescriptors.get("int"))) {
+                    filePrinter.append("i2l\n");
+                } else if(type1.equals(typeDescriptors.get("int"))){
+                    filePrinter.append("dup2_x1\n");
+                    filePrinter.append("pop2\n");
+                    filePrinter.append("i2l\n");
+                    filePrinter.append("dup2_x2\n");
+                    filePrinter.append("pop2\n");
+                }
+                filePrinter.append("lcmp\n");
+                filePrinter.append(String.format("ifle Label%d\n", this.labelCount));
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
+                filePrinter.append(String.format("Label%d:\n", this.labelCount));
+                filePrinter.append("ldc 1\n");
+                filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
+                this.labelCount += 2;
+                return "Z";
+            } else {
+                //Måste vara enbart ints
+                filePrinter.append(String.format("if_icmple Label%d\n", this.labelCount));
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
+                filePrinter.append(String.format("Label%d:\n", this.labelCount));
+                filePrinter.append("ldc 1\n");
+                filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
+                this.labelCount += 2;
+                return "Z";
+            }
+        }
+
+        if(exp.MEQ() != null){
+            String type1 = evaluateExp(exp.exp(0));
+            String type2 = evaluateExp(exp.exp(1));
+            if(type1.equals("J") || type2.equals("J")){
+                if(type2.equals(typeDescriptors.get("int"))) {
+                    filePrinter.append("i2l\n");
+                } else if(type1.equals(typeDescriptors.get("int"))){
+                    filePrinter.append("dup2_x1\n");
+                    filePrinter.append("pop2\n");
+                    filePrinter.append("i2l\n");
+                    filePrinter.append("dup2_x2\n");
+                    filePrinter.append("pop2\n");
+                }
+                filePrinter.append("lcmp\n");
+                filePrinter.append(String.format("ifge Label%d\n", this.labelCount));
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
+                filePrinter.append(String.format("Label%d:\n", this.labelCount));
+                filePrinter.append("ldc 1\n");
+                filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
+                this.labelCount += 2;
+                return "Z";
+            } else {
+                //Måste vara enbart ints
+                filePrinter.append(String.format("if_icmpge Label%d\n", this.labelCount));
+                filePrinter.append("ldc 0\n");
+                filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
+                filePrinter.append(String.format("Label%d:\n", this.labelCount));
+                filePrinter.append("ldc 1\n");
+                filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
+                this.labelCount += 2;
+                return "Z";
+            }
+        }
+
 
         if(exp.NEW() != null){
             if(exp.INT() != null){
