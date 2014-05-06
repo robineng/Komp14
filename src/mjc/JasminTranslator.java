@@ -83,7 +83,7 @@ public class JasminTranslator extends javagrammarBaseListener {
             System.exit(1);
         }
 
-        filePrinter.append(String.format(".class public %s\n", ctx.ID(0).getText()));
+        filePrinter.append(String.format(".class public '%s'\n", ctx.ID(0).getText()));
         filePrinter.append(String.format(".super java/lang/Object\n\n"));
         filePrinter.append(String.format(".method public <init>()V\n"));
         filePrinter.append(String.format("aload_0\n"));
@@ -123,7 +123,7 @@ public class JasminTranslator extends javagrammarBaseListener {
             e.printStackTrace();
             System.exit(1);
         }
-        filePrinter.append(String.format(".class public %s\n", ctx.ID().getText()));
+        filePrinter.append(String.format(".class public '%s'\n", ctx.ID().getText()));
         filePrinter.append(String.format(".super java/lang/Object\n\n"));
         for(javagrammarParser.VardeclContext var : ctx.vardecl()){
             handleVardecl(var);
@@ -146,7 +146,7 @@ public class JasminTranslator extends javagrammarBaseListener {
     public void handleVardecl(javagrammarParser.VardeclContext ctx) {
         if(currMethod == null) {
             VariableSymbol field = currClass.getVar(ctx.ID().getText());
-            filePrinter.append(String.format(".field public %s %s\n", ctx.ID().getText(), getTypeDescriptor(field.getType())));
+            filePrinter.append(String.format(".field public '%s' %s\n", ctx.ID().getText(), getTypeDescriptor(field.getType())));
         } else{
             VariableSymbol var = currMethod.getVar(ctx.ID().getText());
             if(var.getType().equals("long")){
@@ -640,7 +640,7 @@ public class JasminTranslator extends javagrammarBaseListener {
                 }
             }
             if(exp.ID() != null){
-                filePrinter.append(String.format("new %s\n", exp.ID().getText()));
+                filePrinter.append(String.format("new '%s'\n", exp.ID().getText()));
                 filePrinter.append("dup\n");
                 filePrinter.append(String.format("invokespecial %s/<init>()V\n", exp.ID().getText()));
                 return getTypeDescriptor(exp.ID().getText());
