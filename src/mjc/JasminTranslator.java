@@ -279,7 +279,6 @@ public class JasminTranslator extends javagrammarBaseListener {
      * Det var typ det jag tänkt. Låter asbra
      */
     public String evaluateExp(javagrammarParser.ExpContext exp){
-        System.out.println("Exp: " + exp.getText());
         if(exp.INT_LIT() !=  null){
             filePrinter.append(String.format("ldc %s\n", exp.INT_LIT().getText()));
             return typeDescriptors.get("int");
@@ -679,7 +678,7 @@ public class JasminTranslator extends javagrammarBaseListener {
 
         if(exp.ID() == null && exp.LEFTPAREN() != null){
             String type = evaluateExp(exp.exp(0));
-            return getTypeDescriptor(type);
+            return type;
         }
 
         if(exp.ID() != null){
