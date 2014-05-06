@@ -102,6 +102,9 @@ public class JasminTranslator extends javagrammarBaseListener {
         }
         filePrinter.append(String.format(".class public %s\n", ctx.ID().getText()));
         filePrinter.append(String.format(".super java/lang/Object\n\n"));
+        for(javagrammarParser.VardeclContext var : ctx.vardecl()){
+            handleVardecl(var);
+        }
 
 
     }
@@ -117,7 +120,7 @@ public class JasminTranslator extends javagrammarBaseListener {
         this.currClass = null;
     }
 
-    @Override public void enterVardecl(javagrammarParser.VardeclContext ctx) {
+    public void handleVardecl(javagrammarParser.VardeclContext ctx) {
         if(currMethod == null) {
             VariableSymbol field = currClass.getVar(ctx.ID().getText());
             filePrinter.append(String.format(".field public %s %s\n", ctx.ID().getText(), getTypeDescriptor(field.getType())));
@@ -148,6 +151,17 @@ public class JasminTranslator extends javagrammarBaseListener {
         //This seems to be needed
         //TODO Better way of finding stack limit
         filePrinter.append(String.format(".limit stack %d\n", 10));
+        for(javagrammarParser.VardeclContext var : ctx.vardecl()){
+            handleVardecl(var);
+        }
+        for(javagrammarParser.StmtContext stmt : ctx.stmt()){
+            if(stmt.IF() != null){
+                if(stmt.ELSE() != null){
+
+                }
+            }
+            handleStmt(stmt);
+        }
     }
 
     @Override public void exitMethoddecl(javagrammarParser.MethoddeclContext ctx) {
@@ -160,7 +174,12 @@ public class JasminTranslator extends javagrammarBaseListener {
     /*
     Här händer snart en jävla massa grejer.
      */
-    @Override public void enterStmt(javagrammarParser.StmtContext ctx) {
+    public void handleStmt(javagrammarParser.StmtContext ctx) {
+        if(ctx.LEFTBRACE() != null){
+            for(javagrammarParser.StmtContext stmt : ctx.stmt()){
+                handleStmt(stmt);
+            }
+        }
         if(ctx.ASSIGNMENT() != null) {
             if(ctx.LEFTBRACKET() == null){
                 if(currMethod.varExists(ctx.ID().getText())) {
