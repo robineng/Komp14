@@ -79,7 +79,6 @@ public class StatementValidator extends javagrammarBaseListener{
                 if(!(arr.getArrayElementType().equals("long") && expType.matches("int|long") ||
                         (arr.getArrayElementType().equals("int") && expType.equals("int")))) {
                     System.err.println(arr.getArrayElementType());
-                    System.out.println(expType);
                     System.err.println("Can not assign " + expType + " to " + arr.getArrayElementType() + " array on line: " + ctx.ASSIGNMENT().getSymbol().getLine());
                     System.exit(1);
                 }
@@ -275,7 +274,6 @@ public class StatementValidator extends javagrammarBaseListener{
     }
 
     public String getTypeFromId(TerminalNode id){
-        //System.out.println(id.getText());
         if(currMethod.varExists(id.getText())){
             return currMethod.getVar(id.getText()).getType();
         }else if(currClass.varExists(id.getText())){

@@ -1,34 +1,20 @@
 //Måste heta testclass om jtest ska fungera
 class testclass {
     public static void main(String[] args) {
-        long kek;
-        boolean kek2;
-        Frick kek3;
-
-        System.out.println(kek);
-        System.out.println(kek2);
-
-        System.out.println(1  + 2L);
-        System.out.println(2L + 1 );
-        System.out.println(1L + 2L);
-        System.out.println(1  + 2 );
-
-        System.out.println(true);
-        System.out.println(false);
-
-        System.out.println(2  * 3 );
-        System.out.println(2L * 3 );
-        System.out.println(2  * 3L);
-        System.out.println(2L * 3L);
-
-
-        System.out.println(5  - 2 );
-        System.out.println(5  - 2L);
-        System.out.println(5L - 2 );
-        System.out.println(5L - 2L);
+        Frick f;
+        f = new Frick();
+        System.out.println(f.fugg2(155L+15));
     }
 }
 
 class Frick{
+
+    long[] fugger;
+
+    public long fugg2(long fig){
+        fugger = new long[5];
+        fugger[3] = fig;
+        return fugger[3];
+    }
 
 }

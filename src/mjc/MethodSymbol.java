@@ -16,7 +16,8 @@ public class MethodSymbol {
         params = new ArrayList<VariableSymbol>();
         vars = new HashMap<String, VariableSymbol>();
         varsLocal = new HashMap<String, Integer>();
-        localCounter = 0;
+        // 0 är "this"
+        localCounter = 1;
     }
 
     public MethodSymbol(String type){
@@ -24,7 +25,7 @@ public class MethodSymbol {
         params = new ArrayList<VariableSymbol>();
         vars = new HashMap<String, VariableSymbol>();
         varsLocal = new HashMap<String, Integer>();
-        localCounter = 0;
+        localCounter = 1;
     }
 
     public int getLocalCounter(){

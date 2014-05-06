@@ -4,6 +4,7 @@ package mjc;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -99,15 +100,16 @@ public class JasminTranslator extends javagrammarBaseListener {
         }
         filePrinter.append(String.format(".class public %s\n", ctx.ID().getText()));
         filePrinter.append(String.format(".super java/lang/Object\n\n"));
+
+
+    }
+
+    @Override public void exitClassdecl(javagrammarParser.ClassdeclContext ctx) {
         filePrinter.append(String.format(".method public <init>()V\n"));
         filePrinter.append(String.format("aload_0\n"));
         filePrinter.append(String.format("invokenonvirtual java/lang/Object/<init>()V\n"));
         filePrinter.append(String.format("return\n"));
         filePrinter.append(String.format(".end method\n\n"));
-
-    }
-
-    @Override public void exitClassdecl(javagrammarParser.ClassdeclContext ctx) {
         filePrinter.flush();
         filePrinter.close();
         this.currClass = null;
@@ -135,21 +137,11 @@ public class JasminTranslator extends javagrammarBaseListener {
     @Override public void enterMethoddecl(javagrammarParser.MethoddeclContext ctx) {
         this.currMethod = this.currClass.getMethod(ctx.ID().getText());
         filePrinter.append(String.format(".method public %s(", ctx.ID().getText()));
-        VariableSymbol[] params = (VariableSymbol[]) currMethod.getParams().toArray();
+        ArrayList<VariableSymbol> params = currMethod.getParams();
         for(VariableSymbol var : params){
-            if(typeDescriptors.containsKey(var.getType())){
-                //If it's a primitive type
-                filePrinter.append(typeDescriptors.get(var.getType()));
-            } else {
-                //If it's another class
-                filePrinter.append(String.format("L%s;", var.getType()));
-            }
+            filePrinter.append(getTypeDescriptor(var.getType()));
         }
-        if(typeDescriptors.containsKey(ctx.type().getText())){
-            filePrinter.append(String.format(")%s\n", typeDescriptors.get(ctx.type().getText())));
-        }else{
-            filePrinter.append(String.format(")L%s;\n", ctx.type().getText()));
-        }
+        filePrinter.append(String.format(")%s\n", getTypeDescriptor(ctx.type().getText())));
         filePrinter.append(String.format(".limit locals %d\n", currMethod.getLocalCounter()));
         //This seems to be needed
         //TODO Better way of finding stack limit
@@ -158,7 +150,7 @@ public class JasminTranslator extends javagrammarBaseListener {
 
     @Override public void exitMethoddecl(javagrammarParser.MethoddeclContext ctx) {
         evaluateExp(ctx.exp());
-        filePrinter.append("return\n");
+        filePrinter.append(String.format("%sreturn\n", getTypeMnemonic(getTypeDescriptor(currMethod.getType()))));
         filePrinter.append(".end method\n");
         this.currMethod = null;
     }
@@ -170,13 +162,32 @@ public class JasminTranslator extends javagrammarBaseListener {
         if(ctx.ASSIGNMENT() != null) {
             if(ctx.LEFTBRACKET() == null){
                 if(currMethod.varExists(ctx.ID().getText())) {
-                    String prefix = getTypeDescriptor(currMethod.getVar(ctx.ID().getText()).getType());
+                    evaluateExp(ctx.exp(0));
+                    String prefix = getTypeMnemonic(getTypeDescriptor(currMethod.getVar(ctx.ID().getText()).getType()));
+                    int local = currMethod.getVarLocal(ctx.ID().getText());
+                    filePrinter.append(String.format("%sstore %d\n", prefix, local));
                 } else {
+                    //"this"
+                    filePrinter.append(String.format("aload 0\n"));
                     evaluateExp(ctx.exp(0));
                     String type = getTypeDescriptor(currClass.getVar(ctx.ID().getText()).getType());
-                    filePrinter.append(String.format("putfield %s/%s; %s\n", currClass.getId(), ctx.ID().getText(), type));
+                    filePrinter.append(String.format("putfield %s/%s %s\n", currClass.getId(), ctx.ID().getText(), type));
                 }
 
+            } else {
+                if(currMethod.varExists(ctx.ID().getText())){
+                    filePrinter.append(String.format("aload %d\n", currMethod.getVarLocal(ctx.ID().getText())));
+                    evaluateExp(ctx.exp(0));
+                    String type = evaluateExp(ctx.exp(1));
+                    filePrinter.append(String.format("%sastore\n", getTypeMnemonic(type)));
+                } else {
+                    String type = currClass.getVar(ctx.ID().getText()).getType();
+                    filePrinter.append("aload 0\n");
+                    filePrinter.append(String.format("getfield %s/%s %s\n", currClass.getId(), ctx.ID().getText(), getTypeDescriptor(type)));
+                    evaluateExp(ctx.exp(0));
+                    String arrtype = evaluateExp(ctx.exp(1));
+                    filePrinter.append(String.format("%sastore\n", getTypeMnemonic(arrtype)));
+                }
             }
         }
         if(ctx.SYSO() != null){
@@ -274,16 +285,102 @@ public class JasminTranslator extends javagrammarBaseListener {
                 return typeDescriptors.get("int");
             }
         }
+        if(exp.AND() != null){
+            evaluateExp(exp.exp(0));
+            evaluateExp(exp.exp(1));
+            String.format("iand\n");
+            return "Z";
+        }
+        if(exp.OR() != null){
+            evaluateExp(exp.exp(0));
+            evaluateExp(exp.exp(1));
+            String.format("ior\n");
+            return "Z";
+        }
+        if(exp.EQ() != null){
+            
+        }
+
+        if(exp.NEW() != null){
+            if(exp.INT() != null){
+                evaluateExp(exp.exp(0));
+                filePrinter.append(String.format("newarray %s\n", "int"));
+                return getTypeDescriptor("int[]");
+            }
+            if(exp.LONG() != null){
+                evaluateExp(exp.exp(0));{
+                    filePrinter.append(String.format("newarray %s\n", "long"));
+                    return getTypeDescriptor("int[]");
+                }
+            }
+            if(exp.ID() != null){
+                filePrinter.append(String.format("new %s\n", exp.ID().getText()));
+                filePrinter.append("dup\n");
+                filePrinter.append(String.format("invokespecial %s/<init>()V\n", exp.ID().getText()));
+                return getTypeDescriptor(exp.ID().getText());
+            }
+        }
+
+        if(exp.LEFTBRACKET() != null){
+            String type = evaluateExp(exp.exp(0));
+            String prefix;
+            String ret;
+            if(type.indexOf("I") != -1){
+                prefix = "i";
+                ret = "I";
+            } else {
+                prefix = "l";
+                ret = "J";
+            }
+            evaluateExp(exp.exp(1));
+            filePrinter.append(String.format("%saload\n", prefix));
+            return ret;
+        }
+
+        if(exp.THIS() != null){
+            filePrinter.append("aload 0\n");
+            return getTypeDescriptor(currClass.getId());
+        }
+        if(exp.LENGTH() != null){
+            evaluateExp(exp.exp(0));
+            filePrinter.append("arraylength\n");
+            return getTypeDescriptor("int");
+        }
+        if(exp.ID() != null && exp.LEFTPAREN() != null){
+            //TODO Varning för fulhack?
+            String classname = evaluateExp(exp.exp(0)).split("L|;")[1];
+            String methodType = getTypeDescriptor(this.classes.get(classname).getMethod(exp.ID().getText()).getType());
+            ArrayList<String> types = new ArrayList<String>();
+            if(exp.explist().exp() != null){
+                types.add(evaluateExp(exp.explist().exp()));
+                for(javagrammarParser.ExprestContext rest : exp.explist().exprest()){
+                   types.add(evaluateExp(rest.exp()));
+                }
+            }
+            filePrinter.append(String.format("invokevirtual %s/%s(", classname, exp.ID().getText()));
+            for(String type : types){
+                filePrinter.append(type);
+            }
+            filePrinter.append(String.format(")%s\n", methodType));
+            return methodType;
+
+        }
+
+        if(exp.ID() == null && exp.LEFTPAREN() != null){
+            String type = evaluateExp(exp.exp(0));
+            return getTypeDescriptor(type);
+        }
 
         if(exp.ID() != null){
             if(currMethod.varExists(exp.ID().getText())){
                 String type = currMethod.getVar(exp.ID().getText()).getType();
-                String prefix = getTypeMnemonic(typeDescriptors.get(type)) ;
+                String prefix = getTypeMnemonic(getTypeDescriptor(type)) ;
                 int local = currMethod.getVarLocal(exp.ID().getText());
                 filePrinter.append(String.format("%sload %d\n", prefix, local));
                 return getTypeDescriptor(type);
             } else {
                 String type = currClass.getVar(exp.ID().getText()).getType();
+                filePrinter.append("aload 0\n");
                 filePrinter.append(String.format("getfield %s/%s %s\n", currClass.getId(), exp.ID().getText(), getTypeDescriptor(type)));
                 return getTypeDescriptor(type);
             }
