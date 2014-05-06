@@ -79,6 +79,12 @@ public class JasminTranslator extends javagrammarBaseListener {
         //TODO Better way of finding stack limit
         //Must we limit the stack size at all?
         filePrinter.append(String.format(".limit stack %d\n", 10));
+        for(javagrammarParser.VardeclContext var : ctx.vardecl()){
+            handleVardecl(var);
+        }
+        for(javagrammarParser.StmtContext stmt : ctx.stmt()){
+            handleStmt(stmt);
+        }
 
     }
 
@@ -155,11 +161,6 @@ public class JasminTranslator extends javagrammarBaseListener {
             handleVardecl(var);
         }
         for(javagrammarParser.StmtContext stmt : ctx.stmt()){
-            if(stmt.IF() != null){
-                if(stmt.ELSE() != null){
-
-                }
-            }
             handleStmt(stmt);
         }
     }
@@ -175,6 +176,40 @@ public class JasminTranslator extends javagrammarBaseListener {
     Här händer snart en jävla massa grejer.
      */
     public void handleStmt(javagrammarParser.StmtContext ctx) {
+        if(ctx.IF() != null){
+            if(ctx.ELSE() == null){
+                evaluateExp(ctx.exp(0));
+                int label1 = this.labelCount;
+                this.labelCount++;
+                filePrinter.append(String.format("ifeq Label%d\n", label1));
+                handleStmt(ctx.stmt(0));
+                filePrinter.append(String.format("Label%d:\n", label1));
+            } else {
+                evaluateExp(ctx.exp(0));
+                int label1 = this.labelCount;
+                int label2 = this.labelCount + 1;
+                this.labelCount += 2;
+                filePrinter.append(String.format("ifeq Label%d\n", label1));
+                handleStmt(ctx.stmt(0));
+                filePrinter.append(String.format("goto Label%d\n", label2));
+                filePrinter.append(String.format("Label%d:\n", label1));
+                handleStmt(ctx.stmt(1));
+                filePrinter.append(String.format("Label%d:\n", label2));
+            }
+
+        }
+        if(ctx.WHILE() != null){
+            int label1 = this.labelCount;
+            int label2 = this.labelCount + 1;
+            labelCount += 2;
+            filePrinter.append(String.format("Label%d:\n", label1));
+            evaluateExp(ctx.exp(0));
+            filePrinter.append(String.format("ifeq Label%d\n", label2));
+            handleStmt(ctx.stmt(0));
+            filePrinter.append(String.format("goto Label%d\n", label1));
+            filePrinter.append(String.format("Label%d:\n", label2));
+
+        }
         if(ctx.LEFTBRACE() != null){
             for(javagrammarParser.StmtContext stmt : ctx.stmt()){
                 handleStmt(stmt);
@@ -608,7 +643,8 @@ public class JasminTranslator extends javagrammarBaseListener {
         }
         if(exp.ID() != null && exp.LEFTPAREN() != null){
             //TODO Varning för fulhack?
-            String classname = evaluateExp(exp.exp(0)).split("L|;")[1];
+            String classname = evaluateExp(exp.exp(0));
+            classname = classname.substring(1, classname.length()-1);
             String methodType = getTypeDescriptor(this.classes.get(classname).getMethod(exp.ID().getText()).getType());
             ArrayList<String> types = new ArrayList<String>();
             if(exp.explist().exp() != null){
