@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -20,6 +21,7 @@ public class JasminTranslator extends javagrammarBaseListener {
     private HashMap <String, String> typeDescriptors;
     private HashMap <String, String> typeMnemonic;
     private int labelCount;
+    private int stacklimit;
 
     public JasminTranslator(HashMap<String, ClassSymbol> classes) {
         super();
@@ -35,6 +37,21 @@ public class JasminTranslator extends javagrammarBaseListener {
         typeMnemonic.put("J", "l");
         typeMnemonic.put("Z", "i");
         labelCount = 0;
+        stacklimit = getLongestparams() + 5;
+
+    }
+
+    private int getLongestparams(){
+        int ret = 0;
+        Collection<ClassSymbol> cclasses = this.classes.values();
+        for(ClassSymbol cl : this.classes.values()){
+            for(MethodSymbol meth : cl.getMethods().values()){
+                if(meth.getParams().size() > ret){
+                    ret = meth.getParams().size();
+                }
+            }
+        }
+        return ret;
 
     }
 
@@ -78,7 +95,7 @@ public class JasminTranslator extends javagrammarBaseListener {
         filePrinter.append(String.format(".limit locals %d\n", currMethod.getLocalCounter()));
         //TODO Better way of finding stack limit
         //Must we limit the stack size at all?
-        filePrinter.append(String.format(".limit stack %d\n", 10));
+        filePrinter.append(String.format(".limit stack %d\n", this.stacklimit));
         for(javagrammarParser.VardeclContext var : ctx.vardecl()){
             handleVardecl(var);
         }
@@ -156,7 +173,7 @@ public class JasminTranslator extends javagrammarBaseListener {
         filePrinter.append(String.format(".limit locals %d\n", currMethod.getLocalCounter()));
         //This seems to be needed
         //TODO Better way of finding stack limit
-        filePrinter.append(String.format(".limit stack %d\n", 10));
+        filePrinter.append(String.format(".limit stack %d\n", this.stacklimit));
         for(javagrammarParser.VardeclContext var : ctx.vardecl()){
             handleVardecl(var);
         }
