@@ -4,10 +4,9 @@ class testclass {
         long[] kek;
         EnKlass k;
         AnnanKlass ak;
-        k = new EnKlass();
-        ak = new AnnanKlass();
-        kek = k.giveMeLong(ak);
-        System.out.println(kek[3]);
+        System.out.println(!true);
+        System.out.println(!false);
+
     }
 }
 

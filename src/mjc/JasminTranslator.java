@@ -279,6 +279,7 @@ public class JasminTranslator extends javagrammarBaseListener {
      * Det var typ det jag tänkt. Låter asbra
      */
     public String evaluateExp(javagrammarParser.ExpContext exp){
+        System.out.println("Exp: " + exp.getText());
         if(exp.INT_LIT() !=  null){
             filePrinter.append(String.format("ldc %s\n", exp.INT_LIT().getText()));
             return typeDescriptors.get("int");
@@ -593,6 +594,20 @@ public class JasminTranslator extends javagrammarBaseListener {
                 this.labelCount += 2;
                 return "Z";
             }
+        }
+
+        if(exp.NOT() != null){
+            int label1 = this.labelCount;
+            int label2 = this.labelCount + 1;
+            this.labelCount += 2;
+            evaluateExp(exp.exp(0));
+            filePrinter.append(String.format("ifeq Label%d\n", label1));
+            filePrinter.append("ldc 0\n");
+            filePrinter.append(String.format("goto Label%d\n", label2));
+            filePrinter.append(String.format("Label%d:\n", label1));
+            filePrinter.append("ldc 1\n");
+            filePrinter.append(String.format("Label%d:\n", label2));
+            return "Z";
         }
 
 
