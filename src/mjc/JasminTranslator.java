@@ -38,7 +38,7 @@ public class JasminTranslator extends javagrammarBaseListener {
         typeMnemonic.put("J", "l");
         typeMnemonic.put("Z", "i");
         labelCount = 0;
-        stacklimit = getLongestparams() + 5;
+        stacklimit = getLongestparams() + 25;
 
     }
 
@@ -158,7 +158,7 @@ public class JasminTranslator extends javagrammarBaseListener {
                 filePrinter.append(String.format("istore %d ; %s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
             } else {
                 filePrinter.append(String.format("aconst_null ; %s\n", ctx.getText()));
-                filePrinter.append(String.format("astore %d ; &s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
+                filePrinter.append(String.format("astore %d ; %s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
             }
         }
     }
