@@ -1,6 +1,7 @@
 package mjc;
 
 
+import javax.lang.model.element.NestingKind;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -374,14 +375,28 @@ public class JasminTranslator extends javagrammarBaseListener {
         }
         if(exp.AND() != null){
             evaluateExp(exp.exp(0));
+            int label1 = this.labelCount;
+            int label2 = this.labelCount + 1;
+            this.labelCount += 2;
+            filePrinter.append(String.format(String.format("ifeq Label%d\n", label1)));
             evaluateExp(exp.exp(1));
-            filePrinter.append(String.format("iand\n"));
+            filePrinter.append(String.format("goto Label%d\n", label2));
+            filePrinter.append(String.format(String.format("Label%d:\n", label1)));
+            filePrinter.append("ldc 0\n");
+            filePrinter.append(String.format("Label%d:\n", label2));
             return "Z";
         }
         if(exp.OR() != null){
             evaluateExp(exp.exp(0));
+            int label1 = this.labelCount;
+            int label2 = this.labelCount + 1;
+            this.labelCount += 2;
+            filePrinter.append(String.format(String.format("ifne Label%d\n", label1)));
             evaluateExp(exp.exp(1));
-            filePrinter.append(String.format("ior\n"));
+            filePrinter.append(String.format("goto Label%d\n", label2));
+            filePrinter.append(String.format(String.format("Label%d:\n", label1)));
+            filePrinter.append("ldc 1\n");
+            filePrinter.append(String.format("Label%d:\n", label2));
             return "Z";
         }
         if(exp.EQ() != null){
