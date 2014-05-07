@@ -95,7 +95,7 @@ public class JasminTranslator extends javagrammarBaseListener {
         filePrinter.append(String.format(".limit locals %d\n", currMethod.getLocalCounter()));
         //TODO Better way of finding stack limit
         //Must we limit the stack size at all?
-        filePrinter.append(String.format(".limit stack %d\n", currMethod.getLocalCounter()));
+        filePrinter.append(String.format(".limit stack %d\n", stacklimit));
         for(javagrammarParser.VardeclContext var : ctx.vardecl()){
             handleVardecl(var);
         }
@@ -173,7 +173,7 @@ public class JasminTranslator extends javagrammarBaseListener {
         filePrinter.append(String.format(".limit locals %d\n", currMethod.getLocalCounter()));
         //This seems to be needed
         //TODO Better way of finding stack limit
-        filePrinter.append(String.format(".limit stack %d\n", currMethod.getLocalCounter()));
+        filePrinter.append(String.format(".limit stack %d\n", stacklimit));
         for(javagrammarParser.VardeclContext var : ctx.vardecl()){
             handleVardecl(var);
         }
