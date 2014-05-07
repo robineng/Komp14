@@ -150,14 +150,14 @@ public class JasminTranslator extends javagrammarBaseListener {
         } else{
             VariableSymbol var = currMethod.getVar(ctx.ID().getText());
             if(var.getType().equals("long")){
-                filePrinter.append("lconst_0\n");
-                filePrinter.append(String.format("lstore %d\n", currMethod.getVarLocal(ctx.ID().getText())));
+                filePrinter.append(String.format("lconst_0 ; %s\n", ctx.getText()));
+                filePrinter.append(String.format("lstore %d ; %s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
             } else if(var.getType().matches("int|boolean")) {
-                filePrinter.append("ldc 0\n");
-                filePrinter.append(String.format("istore %d\n", currMethod.getVarLocal(ctx.ID().getText())));
+                filePrinter.append(String.format("ldc 0 ; %s\n", ctx.getText()));
+                filePrinter.append(String.format("istore %d ; %s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
             } else {
-                filePrinter.append("aconst_null\n");
-                filePrinter.append(String.format("astore %d\n", currMethod.getVarLocal(ctx.ID().getText())));
+                filePrinter.append(String.format("aconst_null ; %s\n", ctx.getText()));
+                filePrinter.append(String.format("astore %d ; &s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
             }
         }
     }
@@ -375,13 +375,13 @@ public class JasminTranslator extends javagrammarBaseListener {
         if(exp.AND() != null){
             evaluateExp(exp.exp(0));
             evaluateExp(exp.exp(1));
-            String.format("iand\n");
+            filePrinter.append(String.format("iand\n"));
             return "Z";
         }
         if(exp.OR() != null){
             evaluateExp(exp.exp(0));
             evaluateExp(exp.exp(1));
-            String.format("ior\n");
+            filePrinter.append(String.format("ior\n"));
             return "Z";
         }
         if(exp.EQ() != null){
