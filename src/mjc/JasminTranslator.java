@@ -651,7 +651,7 @@ public class JasminTranslator extends javagrammarBaseListener {
             if(exp.LONG() != null){
                 evaluateExp(exp.exp(0));{
                     filePrinter.append(String.format("newarray %s\n", "long"));
-                    return getTypeDescriptor("int[]");
+                    return getTypeDescriptor("long[]");
                 }
             }
             if(exp.ID() != null){

@@ -68,11 +68,11 @@ class Pathfinder{
 	public long[] findPathLengths(Graph graph){
 		IndexHolder ih;
 		boolean trash;
+    long[] res;
 		ih = new IndexHolder();
 		trash = ih.init();
 
 		return this.findLength(graph, graph.getStartNode(), graph.getEndNode(), 0, new long[this.findNumberOfPaths(graph)], ih);
-
 	}
 
 	public long[] findLength(Graph graph, int currNode, int goalNode, int index, long[] lengths, IndexHolder ih){
