@@ -11,6 +11,15 @@ public class MethodSymbol {
     private HashMap<String, VariableSymbol> vars;
     private HashMap<String, Integer> varsLocal;
     private int localCounter;
+    private int stackCounter;
+
+    public int getStackCounter() {
+        return stackCounter;
+    }
+
+    public void setStackCounter(int stackCounter) {
+        this.stackCounter = stackCounter;
+    }
 
     public MethodSymbol(){
         params = new ArrayList<VariableSymbol>();
