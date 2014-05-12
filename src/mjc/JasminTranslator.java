@@ -863,6 +863,7 @@ public class JasminTranslator extends javagrammarBaseListener {
                    types.add(evaluateExp(rest.exp()));
                 }
             }
+            incStack(1); //TODO KEK?
             filePrinter.append(String.format("invokevirtual %s/%s(", classname, exp.ID().getText()));
             incStack(-1);
             for(String type : types){
