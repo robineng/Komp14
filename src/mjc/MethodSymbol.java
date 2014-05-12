@@ -9,16 +9,27 @@ public class MethodSymbol {
     private String type;
     private ArrayList<VariableSymbol> params;
     private HashMap<String, VariableSymbol> vars;
+    private HashMap<String, Integer> varsLocal;
+    private int localCounter;
 
     public MethodSymbol(){
         params = new ArrayList<VariableSymbol>();
         vars = new HashMap<String, VariableSymbol>();
+        varsLocal = new HashMap<String, Integer>();
+        // 0 är "this"
+        localCounter = 1;
     }
 
     public MethodSymbol(String type){
         this.type = type;
         params = new ArrayList<VariableSymbol>();
         vars = new HashMap<String, VariableSymbol>();
+        varsLocal = new HashMap<String, Integer>();
+        localCounter = 1;
+    }
+
+    public int getLocalCounter(){
+        return this.localCounter;
     }
 
     public boolean addParam(String id, VariableSymbol sym){
@@ -27,6 +38,11 @@ public class MethodSymbol {
         }
         this.vars.put(id, sym);
         this.params.add(sym);
+        this.varsLocal.put(id, this.localCounter);
+        if(sym.getType().equals("long")){
+            this.localCounter++;
+        }
+        this.localCounter++;
         return true;
     }
 
@@ -35,7 +51,19 @@ public class MethodSymbol {
             return false;
         }
         this.vars.put(id, sym);
+        this.varsLocal.put(id, this.localCounter);
+        if(sym.getType().equals("long")){
+            this.localCounter++;
+        }
+        this.localCounter++;
         return true;
+    }
+
+    public int getVarLocal(String var){
+        if(!this.varsLocal.containsKey(var)){
+            return -1;
+        }
+        return this.varsLocal.get(var);
     }
 
     public VariableSymbol getVar(String id){

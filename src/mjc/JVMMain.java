@@ -23,7 +23,6 @@ public class JVMMain {
         System.err.println(String.format("Compiling %s...\n", args[0]));
         try {
             javagrammarLexer lexer = new javagrammarLexer(new ANTLRInputStream(new FileInputStream(args[0])));
-            System.out.println(lexer.getAllTokens().size());
             lexer.reset();
             lexer.addErrorListener(new ANTLRErrorListener() {
                 @Override
@@ -58,22 +57,19 @@ public class JVMMain {
               System.err.println("Syntax errors");
               System.exit(1);
             }
-              ParseTreeWalker walker = new ParseTreeWalker();
+            ParseTreeWalker walker = new ParseTreeWalker();
 
-              SymbolRecorder rec = new SymbolRecorder();
-              walker.walk(rec, context);
+            SymbolRecorder rec = new SymbolRecorder();
+            walker.walk(rec, context);
 
-              HashMap<String, ClassSymbol> classes = rec.getClasses();
+            HashMap<String, ClassSymbol> classes = rec.getClasses();
 
-              StatementValidator valid = new StatementValidator(classes);
-              walker.walk(valid, context);
+            StatementValidator valid = new StatementValidator(classes);
+            walker.walk(valid, context);
 
+            JasminTranslator translator = new JasminTranslator(classes);
+            walker.walk(translator, context);
 
-              //javagrammarSymbolListener listener = new javagrammarSymbolListener();
-              //walker.walk(listener, context);
-
-              JasminTranslator translator = new JasminTranslator();
-              walker.walk(translator, context);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
