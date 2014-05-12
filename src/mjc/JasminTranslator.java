@@ -153,13 +153,19 @@ public class JasminTranslator extends javagrammarBaseListener {
             VariableSymbol var = currMethod.getVar(ctx.ID().getText());
             if(var.getType().equals("long")){
                 filePrinter.append(String.format("lconst_0 ; %s\n", ctx.getText()));
+                incStack(2);
                 filePrinter.append(String.format("lstore %d ; %s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
+                incStack(-2);
             } else if(var.getType().matches("int|boolean")) {
                 filePrinter.append(String.format("ldc 0 ; %s\n", ctx.getText()));
+                incStack(1);
                 filePrinter.append(String.format("istore %d ; %s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
+                incStack(-1);
             } else {
                 filePrinter.append(String.format("aconst_null ; %s\n", ctx.getText()));
+                incStack(1);
                 filePrinter.append(String.format("astore %d ; %s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
+                incStack(-1);
             }
         }
     }
@@ -295,8 +301,6 @@ public class JasminTranslator extends javagrammarBaseListener {
                     filePrinter.append(String.format("getfield %s/%s %s\n", currClass.getId(), ctx.ID().getText(), getTypeDescriptor(type)));
                     if(getTypeDescriptor(type).equals("J")){
                         incStack(1);
-                    } else {
-
                     }
                     evaluateExp(ctx.exp(0));
                     String valtype = evaluateExp(ctx.exp(1));
@@ -368,7 +372,6 @@ public class JasminTranslator extends javagrammarBaseListener {
                     filePrinter.append("i2l\n");
                     incStack(1);
                 } else if(type1.equals(typeDescriptors.get("int"))){
-                    //swap = byt plats på första och andra värdet på stacken
                     filePrinter.append("dup2_x1\n");
                     incStack(2);
                     filePrinter.append("pop2\n");
@@ -850,7 +853,6 @@ public class JasminTranslator extends javagrammarBaseListener {
             return getTypeDescriptor("int");
         }
         if(exp.ID() != null && exp.LEFTPAREN() != null){
-            //TODO Varning för fulhack?
             String classname = evaluateExp(exp.exp(0));
             classname = classname.substring(1, classname.length()-1);
             String methodType = getTypeDescriptor(this.classes.get(classname).getMethod(exp.ID().getText()).getType());
@@ -901,8 +903,6 @@ public class JasminTranslator extends javagrammarBaseListener {
                 filePrinter.append(String.format("getfield %s/%s %s\n", currClass.getId(), exp.ID().getText(), getTypeDescriptor(type)));
                 if(getTypeDescriptor(type).equals("J")){
                     incStack(1);
-                } else {
-                    //kek
                 }
                 return getTypeDescriptor(type);
             }
