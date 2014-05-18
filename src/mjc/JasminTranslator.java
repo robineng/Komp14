@@ -25,7 +25,7 @@ public class JasminTranslator extends javagrammarBaseListener {
     private int stacklimit;
     private int currStack;
 
-    private final static boolean STACK_DEBUG = true;
+    private final static boolean STACK_DEBUG = false;
 
     public JasminTranslator(HashMap<String, ClassSymbol> classes) {
         super();
