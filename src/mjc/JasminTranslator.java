@@ -25,6 +25,8 @@ public class JasminTranslator extends javagrammarBaseListener {
     private int stacklimit;
     private int currStack;
 
+    private final static boolean STACK_DEBUG = true;
+
     public JasminTranslator(HashMap<String, ClassSymbol> classes) {
         super();
         this.classes = classes;
@@ -863,11 +865,10 @@ public class JasminTranslator extends javagrammarBaseListener {
                    types.add(evaluateExp(rest.exp()));
                 }
             }
-            incStack(1); //TODO KEK?
             filePrinter.append(String.format("invokevirtual %s/%s(", classname, exp.ID().getText()));
-            incStack(-1);
             for(String type : types){
                 filePrinter.append(type);
+                //Minus for all the args
                 if(type.equals("J")){
                     incStack(-2);
                 } else {
@@ -876,6 +877,14 @@ public class JasminTranslator extends javagrammarBaseListener {
 
             }
             filePrinter.append(String.format(")%s\n", methodType));
+            //Minus for object ref removed
+            incStack(-1);
+            //Handles return value
+            if(methodType.equals("J")){
+                incStack(2);
+            } else {
+                incStack(1);
+            }
             return methodType;
 
         }
@@ -915,6 +924,9 @@ public class JasminTranslator extends javagrammarBaseListener {
         this.currStack += inc;
         if(this.currStack>this.stacklimit){
             this.stacklimit = this.currStack;
+        }
+        if(STACK_DEBUG){
+            filePrinter.append(String.format("; Stack: %d\n", this.currStack));
         }
     }
 }
