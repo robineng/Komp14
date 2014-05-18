@@ -23,6 +23,9 @@ public class JasminTranslator extends javagrammarBaseListener {
     private HashMap <String, String> typeMnemonic;
     private int labelCount;
     private int stacklimit;
+    private int currStack;
+
+    private final static boolean STACK_DEBUG = false;
 
     public JasminTranslator(HashMap<String, ClassSymbol> classes) {
         super();
@@ -75,6 +78,8 @@ public class JasminTranslator extends javagrammarBaseListener {
     @Override public void enterMainclass(javagrammarParser.MainclassContext ctx) {
         this.currClass = this.classes.get(ctx.ID(0).getText());
         this.currMethod = this.currClass.getMethod("main");
+        this.stacklimit = 0;
+        this.currStack = 0;
 
         currClassFile = new File(ctx.ID(0).getText() + ".j");
         try {
@@ -94,9 +99,6 @@ public class JasminTranslator extends javagrammarBaseListener {
         filePrinter.append(String.format(".method public static main([Ljava/lang/String;)V\n"));
         //+1 because args is the only argument
         filePrinter.append(String.format(".limit locals %d\n", currMethod.getLocalCounter()));
-        //TODO Better way of finding stack limit
-        //Must we limit the stack size at all?
-        filePrinter.append(String.format(".limit stack %d\n", stacklimit));
         for(javagrammarParser.VardeclContext var : ctx.vardecl()){
             handleVardecl(var);
         }
@@ -108,6 +110,7 @@ public class JasminTranslator extends javagrammarBaseListener {
 
     @Override public void exitMainclass(javagrammarParser.MainclassContext ctx) {
         filePrinter.append(String.format("return\n"));
+        filePrinter.append(String.format(".limit stack %d\n", stacklimit));
         filePrinter.append(String.format(".end method\n\n"));
         filePrinter.flush();
         filePrinter.close();
@@ -152,18 +155,26 @@ public class JasminTranslator extends javagrammarBaseListener {
             VariableSymbol var = currMethod.getVar(ctx.ID().getText());
             if(var.getType().equals("long")){
                 filePrinter.append(String.format("lconst_0 ; %s\n", ctx.getText()));
+                incStack(2);
                 filePrinter.append(String.format("lstore %d ; %s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
+                incStack(-2);
             } else if(var.getType().matches("int|boolean")) {
                 filePrinter.append(String.format("ldc 0 ; %s\n", ctx.getText()));
+                incStack(1);
                 filePrinter.append(String.format("istore %d ; %s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
+                incStack(-1);
             } else {
                 filePrinter.append(String.format("aconst_null ; %s\n", ctx.getText()));
+                incStack(1);
                 filePrinter.append(String.format("astore %d ; %s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
+                incStack(-1);
             }
         }
     }
 
     @Override public void enterMethoddecl(javagrammarParser.MethoddeclContext ctx) {
+        this.stacklimit = 0;
+        this.currStack = 0;
         this.currMethod = this.currClass.getMethod(ctx.ID().getText());
         filePrinter.append(String.format(".method public %s(", ctx.ID().getText()));
         ArrayList<VariableSymbol> params = currMethod.getParams();
@@ -172,9 +183,6 @@ public class JasminTranslator extends javagrammarBaseListener {
         }
         filePrinter.append(String.format(")%s\n", getTypeDescriptor(ctx.type().getText())));
         filePrinter.append(String.format(".limit locals %d\n", currMethod.getLocalCounter()));
-        //This seems to be needed
-        //TODO Better way of finding stack limit
-        filePrinter.append(String.format(".limit stack %d\n", stacklimit));
         for(javagrammarParser.VardeclContext var : ctx.vardecl()){
             handleVardecl(var);
         }
@@ -186,6 +194,7 @@ public class JasminTranslator extends javagrammarBaseListener {
     @Override public void exitMethoddecl(javagrammarParser.MethoddeclContext ctx) {
         evaluateExp(ctx.exp());
         filePrinter.append(String.format("%sreturn\n", getTypeMnemonic(getTypeDescriptor(currMethod.getType()))));
+        filePrinter.append(String.format(".limit stack %d\n", stacklimit));
         filePrinter.append(".end method\n");
         this.currMethod = null;
     }
@@ -200,6 +209,7 @@ public class JasminTranslator extends javagrammarBaseListener {
                 int label1 = this.labelCount;
                 this.labelCount++;
                 filePrinter.append(String.format("ifeq Label%d\n", label1));
+                incStack(-1);
                 handleStmt(ctx.stmt(0));
                 filePrinter.append(String.format("Label%d:\n", label1));
             } else {
@@ -208,6 +218,7 @@ public class JasminTranslator extends javagrammarBaseListener {
                 int label2 = this.labelCount + 1;
                 this.labelCount += 2;
                 filePrinter.append(String.format("ifeq Label%d\n", label1));
+                incStack(-1);
                 handleStmt(ctx.stmt(0));
                 filePrinter.append(String.format("goto Label%d\n", label2));
                 filePrinter.append(String.format("Label%d:\n", label1));
@@ -223,6 +234,7 @@ public class JasminTranslator extends javagrammarBaseListener {
             filePrinter.append(String.format("Label%d:\n", label1));
             evaluateExp(ctx.exp(0));
             filePrinter.append(String.format("ifeq Label%d\n", label2));
+            incStack(-1);
             handleStmt(ctx.stmt(0));
             filePrinter.append(String.format("goto Label%d\n", label1));
             filePrinter.append(String.format("Label%d:\n", label2));
@@ -240,48 +252,84 @@ public class JasminTranslator extends javagrammarBaseListener {
                     String prefix = getTypeMnemonic(getTypeDescriptor(currMethod.getVar(ctx.ID().getText()).getType()));
                     if(type.equals("I") && prefix.equals("l")){
                         filePrinter.append("i2l\n");
+                        incStack(1);
                     }
                     int local = currMethod.getVarLocal(ctx.ID().getText());
                     filePrinter.append(String.format("%sstore %d\n", prefix, local));
+                    if(prefix.equals("l")){
+                        incStack(-2);
+                    } else {
+                        incStack(-1);
+                    }
                 } else {
                     //"this"
                     filePrinter.append(String.format("aload 0\n"));
+                    incStack(1);
                     String val = evaluateExp(ctx.exp(0));
                     String type = getTypeDescriptor(currClass.getVar(ctx.ID().getText()).getType());
                     if(val.equals("I") && type.equals("J")){
                         filePrinter.append("i2l\n");
+                        incStack(1);
                     }
                     filePrinter.append(String.format("putfield %s/%s %s\n", currClass.getId(), ctx.ID().getText(), type));
+                    if(type.equals("J")){
+                        incStack(-3);
+                    } else {
+                        incStack(-2);
+                    }
                 }
 
             } else {
                 if(currMethod.varExists(ctx.ID().getText())){
                     filePrinter.append(String.format("aload %d\n", currMethod.getVarLocal(ctx.ID().getText())));
+                    incStack(1);
                     evaluateExp(ctx.exp(0));
                     String type = evaluateExp(ctx.exp(1));
                     String arrtype = getTypeDescriptor(currMethod.getVar(ctx.ID().getText()).getArrayElementType());
                     if(type.equals("I") && arrtype.equals("J")){
                         filePrinter.append("i2l\n");
+                        incStack(1);
                     }
                     filePrinter.append(String.format("%sastore\n", getTypeMnemonic(arrtype)));
+                    if(getTypeMnemonic(arrtype).equals("l")){
+                        incStack(-4);
+                    } else {
+                        incStack(-3);
+                    }
                 } else {
                     String type = currClass.getVar(ctx.ID().getText()).getType();
                     filePrinter.append("aload 0\n");
+                    incStack(1);
                     filePrinter.append(String.format("getfield %s/%s %s\n", currClass.getId(), ctx.ID().getText(), getTypeDescriptor(type)));
+                    if(getTypeDescriptor(type).equals("J")){
+                        incStack(1);
+                    }
                     evaluateExp(ctx.exp(0));
                     String valtype = evaluateExp(ctx.exp(1));
                     String arrtype = getTypeDescriptor(currClass.getVar(ctx.ID().getText()).getArrayElementType());
                     if(valtype.equals("I") && arrtype.equals("J")){
                         filePrinter.append("i2l\n");
+                        incStack(1);
                     }
                     filePrinter.append(String.format("%sastore\n", getTypeMnemonic(arrtype)));
+                    if(getTypeMnemonic(arrtype).equals("l")){
+                        incStack(-4);
+                    } else {
+                        incStack(-3);
+                    }
                 }
             }
         }
         if(ctx.SYSO() != null){
             filePrinter.append("getstatic java/lang/System/out Ljava/io/PrintStream;\n");
+            incStack(1);
             String type = evaluateExp(ctx.exp(0));
             filePrinter.append(String.format("invokevirtual java/io/PrintStream/println(%s)V\n", type));
+            if(type.equals("J")){
+                incStack(-3);
+            } else {
+                incStack(-2);
+            }
         }
     }
 
@@ -299,19 +347,23 @@ public class JasminTranslator extends javagrammarBaseListener {
     public String evaluateExp(javagrammarParser.ExpContext exp){
         if(exp.INT_LIT() !=  null){
             filePrinter.append(String.format("ldc %s\n", exp.INT_LIT().getText()));
+            incStack(1);
             return typeDescriptors.get("int");
         }
         if(exp.LONG_LIT() != null){
             //ldc2_w är för att ladda category 2 konstanter (double och long)
             filePrinter.append(String.format("ldc2_w %s\n", exp.LONG_LIT().getText().split("L|l")[0]));
+            incStack(2);
             return typeDescriptors.get("long");
         }
         if(exp.TRUE() != null){
             filePrinter.append("ldc 1\n");
+            incStack(1);
             return typeDescriptors.get("boolean");
         }
         if(exp.FALSE() != null){
             filePrinter.append("ldc 0\n");
+            incStack(1);
             return typeDescriptors.get("boolean");
         }
         if(exp.PLUS() != null){
@@ -320,16 +372,21 @@ public class JasminTranslator extends javagrammarBaseListener {
             if(type1.equals(typeDescriptors.get("long")) || type2.equals(typeDescriptors.get("long"))){
                 if(type2.equals(typeDescriptors.get("int"))){
                     filePrinter.append("i2l\n");
+                    incStack(1);
                 } else if(type1.equals(typeDescriptors.get("int"))){
-                    //swap = byt plats på första och andra värdet på stacken
                     filePrinter.append("dup2_x1\n");
+                    incStack(2);
                     filePrinter.append("pop2\n");
+                    incStack(-2);
                     filePrinter.append("i2l\n");
+                    incStack(1);
                 }
                 filePrinter.append("ladd\n");
+                incStack(-2);
                 return typeDescriptors.get("long");
             }else{
                 filePrinter.append("iadd\n");
+                incStack(-1);
                 return typeDescriptors.get("int");
             }
         }
@@ -339,15 +396,21 @@ public class JasminTranslator extends javagrammarBaseListener {
             if(type1.equals(typeDescriptors.get("long")) || type2.equals(typeDescriptors.get("long"))) {
                 if(type2.equals(typeDescriptors.get("int"))) {
                     filePrinter.append("i2l\n");
+                    incStack(1);
                 } else if(type1.equals(typeDescriptors.get("int"))){
                     filePrinter.append("dup2_x1\n");
+                    incStack(2);
                     filePrinter.append("pop2\n");
+                    incStack(-2);
                     filePrinter.append("i2l\n");
+                    incStack(1);
                 }
                 filePrinter.append("lmul\n");
+                incStack(-2);
                 return typeDescriptors.get("long");
             } else {
                 filePrinter.append("imul\n");
+                incStack(-1);
                 return typeDescriptors.get("int");
             }
         }
@@ -358,18 +421,26 @@ public class JasminTranslator extends javagrammarBaseListener {
             if(type1.equals(typeDescriptors.get("long")) || type2.equals(typeDescriptors.get("long"))) {
                 if(type2.equals(typeDescriptors.get("int"))) {
                     filePrinter.append("i2l\n");
+                    incStack(1);
                 } else if(type1.equals(typeDescriptors.get("int"))) {
                     filePrinter.append("dup2_x1\n");
+                    incStack(2);
                     filePrinter.append("pop2\n");
+                    incStack(-2);
                     filePrinter.append("i2l\n");
+                    incStack(1);
                     filePrinter.append("dup2_x2\n");
+                    incStack(2);
                     filePrinter.append("pop2\n");
+                    incStack(-2);
                 }
                 filePrinter.append("lsub\n");
+                incStack(-2);
                 return typeDescriptors.get("long");
             }
             else {
                 filePrinter.append("isub\n");
+                incStack(-1);
                 return typeDescriptors.get("int");
             }
         }
@@ -379,10 +450,12 @@ public class JasminTranslator extends javagrammarBaseListener {
             int label2 = this.labelCount + 1;
             this.labelCount += 2;
             filePrinter.append(String.format(String.format("ifeq Label%d\n", label1)));
+            incStack(-1);
             evaluateExp(exp.exp(1));
             filePrinter.append(String.format("goto Label%d\n", label2));
             filePrinter.append(String.format(String.format("Label%d:\n", label1)));
             filePrinter.append("ldc 0\n");
+            incStack(1);
             filePrinter.append(String.format("Label%d:\n", label2));
             return "Z";
         }
@@ -392,10 +465,12 @@ public class JasminTranslator extends javagrammarBaseListener {
             int label2 = this.labelCount + 1;
             this.labelCount += 2;
             filePrinter.append(String.format(String.format("ifne Label%d\n", label1)));
+            incStack(-1);
             evaluateExp(exp.exp(1));
             filePrinter.append(String.format("goto Label%d\n", label2));
             filePrinter.append(String.format(String.format("Label%d:\n", label1)));
             filePrinter.append("ldc 1\n");
+            incStack(1);
             filePrinter.append(String.format("Label%d:\n", label2));
             return "Z";
         }
@@ -405,38 +480,53 @@ public class JasminTranslator extends javagrammarBaseListener {
             if(type1.equals("J") || type2.equals("J")){
                 if(type2.equals(typeDescriptors.get("int"))) {
                     filePrinter.append("i2l\n");
+                    incStack(1);
                 } else if(type1.equals(typeDescriptors.get("int"))){
                     filePrinter.append("dup2_x1\n");
+                    incStack(2);
                     filePrinter.append("pop2\n");
+                    incStack(-2);
                     filePrinter.append("i2l\n");
+                    incStack(1);
                 }
                 filePrinter.append("lcmp\n");
+                incStack(-3);
                 filePrinter.append("ldc 0\n");
+                incStack(1);
                 filePrinter.append(String.format("if_icmpeq Label%d\n", this.labelCount));
+                incStack(-2);
                 filePrinter.append("ldc 0\n");
+                //incStack(1);
                 filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
                 filePrinter.append(String.format("Label%d:\n", this.labelCount));
                 filePrinter.append("ldc 1\n");
+                incStack(1);
                 filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
                 this.labelCount += 2;
                 return "Z";
             }
             else if(type1.equals("I") && type2.equals("I") || type1.equals("Z") && type2.equals("Z")){
                 filePrinter.append(String.format("if_icmpeq Label%d\n", this.labelCount));
+                incStack(-2);
                 filePrinter.append("ldc 0\n");
+                //incStack(1);
                 filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
                 filePrinter.append(String.format("Label%d:\n", this.labelCount));
                 filePrinter.append("ldc 1\n");
+                incStack(1);
                 filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
                 this.labelCount += 2;
                 return "Z";
             } else {
                 //Har vi kommit hit så dealar vi med objektreferenser
                 filePrinter.append(String.format("if_acmpeq Label%d\n", this.labelCount));
+                incStack(-2);
                 filePrinter.append("ldc 0\n");
+                //incStack(1);
                 filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
                 filePrinter.append(String.format("Label%d:\n", this.labelCount));
                 filePrinter.append("ldc 1\n");
+                incStack(1);
                 filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
                 this.labelCount += 2;
                 return "Z";
@@ -449,38 +539,53 @@ public class JasminTranslator extends javagrammarBaseListener {
             if(type1.equals("J") || type2.equals("J")){
                 if(type2.equals(typeDescriptors.get("int"))) {
                     filePrinter.append("i2l\n");
+                    incStack(1);
                 } else if(type1.equals(typeDescriptors.get("int"))){
                     filePrinter.append("dup2_x1\n");
+                    incStack(2);
                     filePrinter.append("pop2\n");
+                    incStack(-2);
                     filePrinter.append("i2l\n");
+                    incStack(1);
                 }
                 filePrinter.append("lcmp\n");
+                incStack(-3);
                 filePrinter.append("ldc 0\n");
+                incStack(1);
                 filePrinter.append(String.format("if_icmpne Label%d\n", this.labelCount));
+                incStack(-2);
                 filePrinter.append("ldc 0\n");
+                ///incStack(1);
                 filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
                 filePrinter.append(String.format("Label%d:\n", this.labelCount));
                 filePrinter.append("ldc 1\n");
+                incStack(1);
                 filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
                 this.labelCount += 2;
                 return "Z";
             }
             else if(type1.equals("I") && type2.equals("I") || type1.equals("Z") && type2.equals("Z")){
                 filePrinter.append(String.format("if_icmpne Label%d\n", this.labelCount));
+                incStack(-2);
                 filePrinter.append("ldc 0\n");
+                //incStack(1);
                 filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
                 filePrinter.append(String.format("Label%d:\n", this.labelCount));
                 filePrinter.append("ldc 1\n");
+                incStack(1);
                 filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
                 this.labelCount += 2;
                 return "Z";
             } else {
                 //Har vi kommit hit så dealar vi med objektreferenser
                 filePrinter.append(String.format("if_acmpne Label%d\n", this.labelCount));
+                incStack(-2);
                 filePrinter.append("ldc 0\n");
+                //incStack(1);
                 filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
                 filePrinter.append(String.format("Label%d:\n", this.labelCount));
                 filePrinter.append("ldc 1\n");
+                incStack(1);
                 filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
                 this.labelCount += 2;
                 return "Z";
@@ -493,29 +598,42 @@ public class JasminTranslator extends javagrammarBaseListener {
             if(type1.equals("J") || type2.equals("J")){
                 if(type2.equals(typeDescriptors.get("int"))) {
                     filePrinter.append("i2l\n");
+                    incStack(1);
                 } else if(type1.equals(typeDescriptors.get("int"))){
                     filePrinter.append("dup2_x1\n");
+                    incStack(2);
                     filePrinter.append("pop2\n");
+                    incStack(-2);
                     filePrinter.append("i2l\n");
+                    incStack(1);
                     filePrinter.append("dup2_x2\n");
+                    incStack(2);
                     filePrinter.append("pop2\n");
+                    incStack(-2);
                 }
                 filePrinter.append("lcmp\n");
+                incStack(-3);
                 filePrinter.append(String.format("iflt Label%d\n", this.labelCount));
+                incStack(-1);
                 filePrinter.append("ldc 0\n");
+                //incStack(1);
                 filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
                 filePrinter.append(String.format("Label%d:\n", this.labelCount));
                 filePrinter.append("ldc 1\n");
+                incStack(1);
                 filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
                 this.labelCount += 2;
                 return "Z";
             } else {
                 //Måste vara enbart ints
                 filePrinter.append(String.format("if_icmplt Label%d\n", this.labelCount));
+                incStack(-2);
                 filePrinter.append("ldc 0\n");
+                //incStack(1);
                 filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
                 filePrinter.append(String.format("Label%d:\n", this.labelCount));
                 filePrinter.append("ldc 1\n");
+                incStack(1);
                 filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
                 this.labelCount += 2;
                 return "Z";
@@ -528,29 +646,42 @@ public class JasminTranslator extends javagrammarBaseListener {
             if(type1.equals("J") || type2.equals("J")){
                 if(type2.equals(typeDescriptors.get("int"))) {
                     filePrinter.append("i2l\n");
+                    incStack(1);
                 } else if(type1.equals(typeDescriptors.get("int"))){
                     filePrinter.append("dup2_x1\n");
+                    incStack(2);
                     filePrinter.append("pop2\n");
+                    incStack(-2);
                     filePrinter.append("i2l\n");
+                    incStack(1);
                     filePrinter.append("dup2_x2\n");
+                    incStack(2);
                     filePrinter.append("pop2\n");
+                    incStack(-2);
                 }
                 filePrinter.append("lcmp\n");
+                incStack(-3);
                 filePrinter.append(String.format("ifgt Label%d\n", this.labelCount));
+                incStack(-1);
                 filePrinter.append("ldc 0\n");
+                //incStack(1);
                 filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
                 filePrinter.append(String.format("Label%d:\n", this.labelCount));
                 filePrinter.append("ldc 1\n");
+                incStack(1);
                 filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
                 this.labelCount += 2;
                 return "Z";
             } else {
                 //Måste vara enbart ints
                 filePrinter.append(String.format("if_icmpgt Label%d\n", this.labelCount));
+                incStack(-2);
                 filePrinter.append("ldc 0\n");
+                //incStack(1);
                 filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
                 filePrinter.append(String.format("Label%d:\n", this.labelCount));
                 filePrinter.append("ldc 1\n");
+                incStack(1);
                 filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
                 this.labelCount += 2;
                 return "Z";
@@ -563,29 +694,42 @@ public class JasminTranslator extends javagrammarBaseListener {
             if(type1.equals("J") || type2.equals("J")){
                 if(type2.equals(typeDescriptors.get("int"))) {
                     filePrinter.append("i2l\n");
+                    incStack(1);
                 } else if(type1.equals(typeDescriptors.get("int"))){
                     filePrinter.append("dup2_x1\n");
+                    incStack(2);
                     filePrinter.append("pop2\n");
+                    incStack(-2);
                     filePrinter.append("i2l\n");
+                    incStack(1);
                     filePrinter.append("dup2_x2\n");
+                    incStack(2);
                     filePrinter.append("pop2\n");
+                    incStack(-2);
                 }
                 filePrinter.append("lcmp\n");
+                incStack(-3);
                 filePrinter.append(String.format("ifle Label%d\n", this.labelCount));
+                incStack(-1);
                 filePrinter.append("ldc 0\n");
+                //incStack(1);
                 filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
                 filePrinter.append(String.format("Label%d:\n", this.labelCount));
                 filePrinter.append("ldc 1\n");
+                incStack(1);
                 filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
                 this.labelCount += 2;
                 return "Z";
             } else {
                 //Måste vara enbart ints
                 filePrinter.append(String.format("if_icmple Label%d\n", this.labelCount));
+                incStack(-2);
                 filePrinter.append("ldc 0\n");
+                //incStack(1);
                 filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
                 filePrinter.append(String.format("Label%d:\n", this.labelCount));
                 filePrinter.append("ldc 1\n");
+                incStack(1);
                 filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
                 this.labelCount += 2;
                 return "Z";
@@ -598,29 +742,42 @@ public class JasminTranslator extends javagrammarBaseListener {
             if(type1.equals("J") || type2.equals("J")){
                 if(type2.equals(typeDescriptors.get("int"))) {
                     filePrinter.append("i2l\n");
+                    incStack(1);
                 } else if(type1.equals(typeDescriptors.get("int"))){
                     filePrinter.append("dup2_x1\n");
+                    incStack(2);
                     filePrinter.append("pop2\n");
+                    incStack(-2);
                     filePrinter.append("i2l\n");
+                    incStack(1);
                     filePrinter.append("dup2_x2\n");
+                    incStack(2);
                     filePrinter.append("pop2\n");
+                    incStack(-2);
                 }
                 filePrinter.append("lcmp\n");
+                incStack(-3);
                 filePrinter.append(String.format("ifge Label%d\n", this.labelCount));
+                incStack(-1);
                 filePrinter.append("ldc 0\n");
+                //incStack(1);
                 filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
                 filePrinter.append(String.format("Label%d:\n", this.labelCount));
                 filePrinter.append("ldc 1\n");
+                incStack(1);
                 filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
                 this.labelCount += 2;
                 return "Z";
             } else {
                 //Måste vara enbart ints
                 filePrinter.append(String.format("if_icmpge Label%d\n", this.labelCount));
+                incStack(-2);
                 filePrinter.append("ldc 0\n");
+                //incStack(1);
                 filePrinter.append(String.format("goto Label%d\n", this.labelCount + 1));
                 filePrinter.append(String.format("Label%d:\n", this.labelCount));
                 filePrinter.append("ldc 1\n");
+                incStack(1);
                 filePrinter.append(String.format("Label%d:\n", this.labelCount + 1));
                 this.labelCount += 2;
                 return "Z";
@@ -633,10 +790,13 @@ public class JasminTranslator extends javagrammarBaseListener {
             this.labelCount += 2;
             evaluateExp(exp.exp(0));
             filePrinter.append(String.format("ifeq Label%d\n", label1));
+            incStack(-1);
             filePrinter.append("ldc 0\n");
+            //incStack(1);
             filePrinter.append(String.format("goto Label%d\n", label2));
             filePrinter.append(String.format("Label%d:\n", label1));
             filePrinter.append("ldc 1\n");
+            incStack(1);
             filePrinter.append(String.format("Label%d:\n", label2));
             return "Z";
         }
@@ -656,8 +816,11 @@ public class JasminTranslator extends javagrammarBaseListener {
             }
             if(exp.ID() != null){
                 filePrinter.append(String.format("new '%s'\n", exp.ID().getText()));
+                incStack(1);
                 filePrinter.append("dup\n");
+                incStack(1);
                 filePrinter.append(String.format("invokespecial %s/<init>()V\n", exp.ID().getText()));
+                incStack(-1);
                 return getTypeDescriptor(exp.ID().getText());
             }
         }
@@ -675,11 +838,15 @@ public class JasminTranslator extends javagrammarBaseListener {
             }
             evaluateExp(exp.exp(1));
             filePrinter.append(String.format("%saload\n", prefix));
+            if(prefix.equals("i")){
+                incStack(-1);
+            }
             return ret;
         }
 
         if(exp.THIS() != null){
             filePrinter.append("aload 0\n");
+            incStack(1);
             return getTypeDescriptor(currClass.getId());
         }
         if(exp.LENGTH() != null){
@@ -688,7 +855,6 @@ public class JasminTranslator extends javagrammarBaseListener {
             return getTypeDescriptor("int");
         }
         if(exp.ID() != null && exp.LEFTPAREN() != null){
-            //TODO Varning för fulhack?
             String classname = evaluateExp(exp.exp(0));
             classname = classname.substring(1, classname.length()-1);
             String methodType = getTypeDescriptor(this.classes.get(classname).getMethod(exp.ID().getText()).getType());
@@ -702,8 +868,23 @@ public class JasminTranslator extends javagrammarBaseListener {
             filePrinter.append(String.format("invokevirtual %s/%s(", classname, exp.ID().getText()));
             for(String type : types){
                 filePrinter.append(type);
+                //Minus for all the args
+                if(type.equals("J")){
+                    incStack(-2);
+                } else {
+                    incStack(-1);
+                }
+
             }
             filePrinter.append(String.format(")%s\n", methodType));
+            //Minus for object ref removed
+            incStack(-1);
+            //Handles return value
+            if(methodType.equals("J")){
+                incStack(2);
+            } else {
+                incStack(1);
+            }
             return methodType;
 
         }
@@ -719,14 +900,33 @@ public class JasminTranslator extends javagrammarBaseListener {
                 String prefix = getTypeMnemonic(getTypeDescriptor(type)) ;
                 int local = currMethod.getVarLocal(exp.ID().getText());
                 filePrinter.append(String.format("%sload %d\n", prefix, local));
+                if(prefix.equals("l")){
+                    incStack(2);
+                } else {
+                    incStack(1);
+                }
                 return getTypeDescriptor(type);
             } else {
                 String type = currClass.getVar(exp.ID().getText()).getType();
                 filePrinter.append("aload 0\n");
+                incStack(1);
                 filePrinter.append(String.format("getfield %s/%s %s\n", currClass.getId(), exp.ID().getText(), getTypeDescriptor(type)));
+                if(getTypeDescriptor(type).equals("J")){
+                    incStack(1);
+                }
                 return getTypeDescriptor(type);
             }
         }
         return null;
+    }
+
+    private void incStack(int inc){
+        this.currStack += inc;
+        if(this.currStack>this.stacklimit){
+            this.stacklimit = this.currStack;
+        }
+        if(STACK_DEBUG){
+            filePrinter.append(String.format("; Stack: %d\n", this.currStack));
+        }
     }
 }
