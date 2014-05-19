@@ -1,16 +1,17 @@
 package mjc;
 
 
-import javax.lang.model.element.NestingKind;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 
 /**
- * Created by suicidal on 4/3/14.
+ * JasminTranslator is a walkable class using the javagrammarBaseListener.
+ * This class is specficly used for appending jasmin code to files using information both from
+ * the syntax tree and from the data (classes HashMap) generated in the SymbolRecorder class.
+ *
  */
 public class JasminTranslator extends javagrammarBaseListener {
 
@@ -25,6 +26,7 @@ public class JasminTranslator extends javagrammarBaseListener {
     private int stacklimit;
     private int currStack;
 
+    //If true: Prints the evaluated stack depth after every expression
     private final static boolean STACK_DEBUG = false;
 
     public JasminTranslator(HashMap<String, ClassSymbol> classes) {
@@ -41,24 +43,14 @@ public class JasminTranslator extends javagrammarBaseListener {
         typeMnemonic.put("J", "l");
         typeMnemonic.put("Z", "i");
         labelCount = 0;
-        stacklimit = getLongestparams() + 25;
 
     }
 
-    private int getLongestparams(){
-        int ret = 0;
-        Collection<ClassSymbol> cclasses = this.classes.values();
-        for(ClassSymbol cl : this.classes.values()){
-            for(MethodSymbol meth : cl.getMethods().values()){
-                if(meth.getParams().size() > ret){
-                    ret = meth.getParams().size();
-                }
-            }
-        }
-        return ret;
-
-    }
-
+    /**
+     * Returns the Jasmin type descriptor of the desired type
+     * @param type the type, for example "int" or "long[]"
+     * @return the jasmin typeDescriptor
+     */
     private String getTypeDescriptor(String type){
         if(typeDescriptors.containsKey(type)){
             return typeDescriptors.get(type);
@@ -66,6 +58,12 @@ public class JasminTranslator extends javagrammarBaseListener {
         return String.format("L%s;", type);
     }
 
+    /**
+     * Returns the JVM instruction type mnemonic of desired type descriptor
+     *
+     * @param type The type descriptor, for example "I" or "[J"
+     * @return the type mnemonic, for example "i" or "l"
+     */
     private String getTypeMnemonic (String type) {
         if(typeMnemonic.containsKey(type)) {
             return typeMnemonic.get(type);
@@ -75,6 +73,11 @@ public class JasminTranslator extends javagrammarBaseListener {
         }
     }
 
+    /**
+     * Makes a new class file (.j) and writes initial code and starts on main method.
+     *
+     * @param ctx
+     */
     @Override public void enterMainclass(javagrammarParser.MainclassContext ctx) {
         this.currClass = this.classes.get(ctx.ID(0).getText());
         this.currMethod = this.currClass.getMethod("main");
@@ -97,7 +100,6 @@ public class JasminTranslator extends javagrammarBaseListener {
         filePrinter.append(String.format("return\n"));
         filePrinter.append(String.format(".end method\n\n"));
         filePrinter.append(String.format(".method public static main([Ljava/lang/String;)V\n"));
-        //+1 because args is the only argument
         filePrinter.append(String.format(".limit locals %d\n", currMethod.getLocalCounter()));
         for(javagrammarParser.VardeclContext var : ctx.vardecl()){
             handleVardecl(var);
@@ -108,6 +110,11 @@ public class JasminTranslator extends javagrammarBaseListener {
 
     }
 
+    /**
+     * Closes the main method and exits the mainclass.
+     *
+     * @param ctx
+     */
     @Override public void exitMainclass(javagrammarParser.MainclassContext ctx) {
         filePrinter.append(String.format("return\n"));
         filePrinter.append(String.format(".limit stack %d\n", stacklimit));
@@ -118,6 +125,11 @@ public class JasminTranslator extends javagrammarBaseListener {
         this.currMethod = null;
     }
 
+    /**
+     * Enters a new class, creating a new file and appending initial code.
+     *
+     * @param ctx
+     */
     @Override public void enterClassdecl(javagrammarParser.ClassdeclContext ctx) {
         this.currClass = this.classes.get(ctx.ID().getText());
         currClassFile = new File(ctx.ID().getText() + ".j");
@@ -136,6 +148,11 @@ public class JasminTranslator extends javagrammarBaseListener {
 
     }
 
+    /**
+     * Appends code for class constructor and exits the class.
+     *
+     * @param ctx
+     */
     @Override public void exitClassdecl(javagrammarParser.ClassdeclContext ctx) {
         filePrinter.append(String.format(".method public <init>()V\n"));
         filePrinter.append(String.format("aload_0\n"));
@@ -147,6 +164,12 @@ public class JasminTranslator extends javagrammarBaseListener {
         this.currClass = null;
     }
 
+    /**
+     * Handles a varaible declaration by appending neccesary jasmin code depending
+     * on type as well as if it's in a local or global context.
+     *
+     * @param ctx The variable context.
+     */
     public void handleVardecl(javagrammarParser.VardeclContext ctx) {
         if(currMethod == null) {
             VariableSymbol field = currClass.getVar(ctx.ID().getText());
@@ -154,24 +177,29 @@ public class JasminTranslator extends javagrammarBaseListener {
         } else{
             VariableSymbol var = currMethod.getVar(ctx.ID().getText());
             if(var.getType().equals("long")){
-                filePrinter.append(String.format("lconst_0 ; %s\n", ctx.getText()));
+                filePrinter.append(String.format("lconst_0\n"));
                 incStack(2);
-                filePrinter.append(String.format("lstore %d ; %s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
+                filePrinter.append(String.format("lstore %d\n", currMethod.getVarLocal(ctx.ID().getText())));
                 incStack(-2);
             } else if(var.getType().matches("int|boolean")) {
-                filePrinter.append(String.format("ldc 0 ; %s\n", ctx.getText()));
+                filePrinter.append(String.format("ldc 0\n"));
                 incStack(1);
-                filePrinter.append(String.format("istore %d ; %s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
+                filePrinter.append(String.format("istore %d\n", currMethod.getVarLocal(ctx.ID().getText())));
                 incStack(-1);
             } else {
-                filePrinter.append(String.format("aconst_null ; %s\n", ctx.getText()));
+                filePrinter.append(String.format("aconst_null\n"));
                 incStack(1);
-                filePrinter.append(String.format("astore %d ; %s\n", currMethod.getVarLocal(ctx.ID().getText()), ctx.getText()));
+                filePrinter.append(String.format("astore %d\n", currMethod.getVarLocal(ctx.ID().getText())));
                 incStack(-1);
             }
         }
     }
 
+    /**
+     * Enters a method declaration, appends neccesary method code to the file.
+     *
+     * @param ctx
+     */
     @Override public void enterMethoddecl(javagrammarParser.MethoddeclContext ctx) {
         this.stacklimit = 0;
         this.currStack = 0;
@@ -191,6 +219,11 @@ public class JasminTranslator extends javagrammarBaseListener {
         }
     }
 
+    /**
+     * Exits a method declaration, appending neccesary code as well as the stack limit.
+     *
+     * @param ctx
+     */
     @Override public void exitMethoddecl(javagrammarParser.MethoddeclContext ctx) {
         evaluateExp(ctx.exp());
         filePrinter.append(String.format("%sreturn\n", getTypeMnemonic(getTypeDescriptor(currMethod.getType()))));
@@ -199,8 +232,14 @@ public class JasminTranslator extends javagrammarBaseListener {
         this.currMethod = null;
     }
 
-    /*
-    Här händer snart en jävla massa grejer.
+
+    /**
+     * Handles a Stmt by:
+     * Making branches if we deal with IF or WHILE
+     * Evaluates expressions and stores the values if we deal with assignments
+     * Printing expression with SYSO
+     *
+     * @param ctx
      */
     public void handleStmt(javagrammarParser.StmtContext ctx) {
         if(ctx.IF() != null){
@@ -333,16 +372,13 @@ public class JasminTranslator extends javagrammarBaseListener {
         }
     }
 
-    /*
-     * Förslag:
-     * Alla exps är i slutändan ett enda värde (antingen en primitiv typ eller en pekare)
-     * denna metod appendar jasminkod för att räkna ut expen och sedan lägger värdet överst
-     * i stacken. Det är sedan upp till Stmt att bestämma vad som ska göras med den.
+    /**
+     * Evaluates an expression by appending the code neccesary to do an
+     * evaluation. The answer should be on top of the stack when the method returns.
      *
-     * Vi returnerar en string med typen av expen för att det är information som kan behövas
-     * vid val av instruktion.
      *
-     * Det var typ det jag tänkt. Låter asbra
+     * @param exp The expression context to evaluate
+     * @return a Jasmin type descriptor descriing the type of the result.
      */
     public String evaluateExp(javagrammarParser.ExpContext exp){
         if(exp.INT_LIT() !=  null){
@@ -920,6 +956,12 @@ public class JasminTranslator extends javagrammarBaseListener {
         return null;
     }
 
+    /**
+     * Inreases OR decreases the value of the current stack depth.
+     * Saves the value to stacklimit if the current stack depth is higher.
+     *
+     * @param inc The value to increase or decrease the current stack depth with.
+     */
     private void incStack(int inc){
         this.currStack += inc;
         if(this.currStack>this.stacklimit){
